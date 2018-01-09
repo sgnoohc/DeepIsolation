@@ -24,7 +24,7 @@
 #include "../CORE/PhotonSelections.cc"
 #include "../CORE/TriggerSelections.cc"
 #include "../CORE/VertexSelections.cc"
-//#include "../CORE/MCSelections.cc"
+#include "../CORE/MCSelections.cc"
 #include "../CORE/MetSelections.cc"
 #include "../CORE/SimPa.cc"
 #include "../CORE/Tools/jetcorr/FactorizedJetCorrector.h"
@@ -39,6 +39,48 @@
 
 using namespace std;
 using namespace tas;
+
+// "Good" mu/el id functions taken from Philip's old babymaker
+//_________________________________________________________________________________________________
+// Returns a vector of indices for good loose muons in CMS3.
+std::vector<unsigned int> goodMuonIdx()
+{
+    // Loop over the muons and select good baseline muons.
+    std::vector<unsigned int> good_muon_idx;
+    for ( unsigned int imu = 0; imu < cms3.mus_p4().size(); ++imu )
+    {
+        if (!( isLooseMuonPOG( imu )                      )) continue;
+        if (!( fabs(cms3.mus_p4()[imu].pt())     >  10    )) continue;
+        if (!( fabs(cms3.mus_p4()[imu].eta())    <=  2.4  )) continue;
+        if (!( fabs(cms3.mus_dxyPV()[imu])       <=  0.05 )) continue;
+        if (!( fabs(cms3.mus_dzPV()[imu])        <=  0.1  )) continue;
+        if (!( muRelIso03EA( imu, 1 )            <   0.5  )) continue;
+        good_muon_idx.push_back( imu );
+    }
+    return good_muon_idx;
+}
+
+//_________________________________________________________________________________________________
+// Returns a vector of indices for good loose muons in CMS3.
+std::vector<unsigned int> goodElecIdx()
+{
+    // Loop over the electrons and select good baseline electrons.
+    std::vector<unsigned int> good_elec_idx;
+    for ( unsigned int iel = 0; iel < cms3.els_p4().size(); ++iel )
+    {
+//      if (!( isTriggerSafenoIso_v1( iel )               )) continue; // If at some point we ever need it we can turn it on later.
+        if (!( isVetoElectronPOGspring16noIso_v1( iel )   )) continue;
+        if (!( fabs(cms3.els_p4()[iel].pt())     >  10    )) continue;
+        if (!( fabs(cms3.els_p4()[iel].eta())    <=  2.5  )) continue;
+        if (!( fabs(cms3.els_dxyPV()[iel])       <=  0.05 )) continue;
+        if (!( fabs(cms3.els_dzPV()[iel])        <=  0.1  )) continue;
+        if (!( eleRelIso03EA( iel, 2 )           <   0.5  )) continue;
+        good_elec_idx.push_back( iel );
+    }
+    return good_elec_idx;
+}
+
+
 
 void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
@@ -92,8 +134,56 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
       nvtx = 0;
       for ( unsigned int ivtx = 0; ivtx < cms3.evt_nvtxs(); ivtx++ )
 	  if ( isGoodVertex( ivtx ) ) nvtx++;
+      
+      // Identify good leptons
+      std::vector<unsigned int> good_muon_idx = goodMuonIdx();
+      std::vector<unsigned int> good_elec_idx = goodElecIdx(); 
 
-      FillBabyNtuple();
+      int nGoodMuons = good_muon_idx.size();
+      int nGoodElecs = good_elec_idx.size();
+
+      std::vector<unsigned int> good_lep_idx;
+      good_lep_idx.reserve(nGoodMuons + nGoodElecs);
+      good_lep_idx.insert(good_lep_idx.end(), good_muon_idx.begin(), good_muon_idx.end());
+      good_lep_idx.insert(good_lep_idx.end(), good_elec_idx.begin(), good_elec_idx.end());
+
+      //////////////////////////
+      // Loop through leptons //
+      //////////////////////////
+      for ( unsigned int lIdx = 0; lIdx < nGoodMuons + nGoodElecs; lIdx++ ) {
+        unsigned int lepIdx = good_lep_idx[lIdx];
+        bool isMu = lIdx < nGoodMuons;
+
+        LorentzVector pLep = isMu ? cms3.mus_p4()[lepIdx] : cms3.els_p4()[lepIdx]; 
+  
+        lepton_flavor = isMu ? 1 : 0;
+      
+        lepton_eta = pLep.eta();
+        lepton_phi = pLep.phi();
+        lepton_pt  = pLep.pt() ;
+
+        int pdgid = isMu ? 13 : 11;
+
+        lepton_isFromW = isFromW(abs(pdgid), lepIdx);
+        lepton_isFromB = isFromB(abs(pdgid), lepIdx);
+	lepton_isFromC = isFromC(abs(pdgid), lepIdx);
+	lepton_isFromL = isFromLight(abs(pdgid), lepIdx);
+	lepton_isFromLF = isFromLightFake(abs(pdgid), lepIdx);
+
+        lepton_relIso03EA = isMu ? muRelIso03EA(lepIdx, 1) : eleRelIso03EA(lepIdx, 2);
+        lepton_chiso = isMu ? cms3.mus_isoR03_pf_ChargedHadronPt()[lepIdx] : cms3.els_pfChargedHadronIso()[lepIdx];
+        lepton_nhiso = isMu ? cms3.mus_isoR03_pf_NeutralHadronEt()[lepIdx] : cms3.els_pfNeutralHadronIso()[lepIdx];
+        lepton_emiso = isMu ? cms3.mus_isoR03_pf_PhotonEt()[lepIdx] : cms3.els_pfPhotonIso()[lepIdx];
+        lepton_ncorriso = lepton_nhiso + lepton_emiso - evt_fixgridfastjet_all_rho() * (isMu ? muEA03(lepIdx, 1) : elEA03(lepIdx, 2));
+
+        lepton_dxy  = isMu ? cms3.mus_dxyPV()[lepIdx] : cms3.els_dxyPV()[lepIdx];
+        lepton_dz   = isMu ? cms3.mus_dzPV()[lepIdx] : cms3.els_dzPV()[lepIdx];
+        lepton_ip3d = isMu ? cms3.mus_ip3d()[lepIdx] : cms3.els_ip3d()[lepIdx];
+
+        FillBabyNtuple();
+
+        } // end lepton loop
+
       } // end loop on events in file
     delete tree;
     f.Close();
@@ -126,6 +216,27 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lumi"  , &lumi   );
   BabyTree_->Branch("evt"   , &evt    );
 
+  BabyTree_->Branch("nvtx"   , &nvtx    );
+
+  BabyTree_->Branch("lepton_flavor"   , &lepton_flavor    );
+  BabyTree_->Branch("lepton_isFromW"   , &lepton_isFromW    );
+  BabyTree_->Branch("lepton_isFromB"   , &lepton_isFromB    );
+  BabyTree_->Branch("lepton_isFromC"   , &lepton_isFromC    );
+  BabyTree_->Branch("lepton_isFromL"   , &lepton_isFromL    );
+  BabyTree_->Branch("lepton_isFromLF"   , &lepton_isFromLF    ); 
+
+  BabyTree_->Branch("lepton_eta"   , &lepton_eta    );
+  BabyTree_->Branch("lepton_phi"   , &lepton_phi    );
+  BabyTree_->Branch("lepton_pt"   , &lepton_pt    );
+  BabyTree_->Branch("lepton_relIso03EA"   , &lepton_relIso03EA    );
+  BabyTree_->Branch("lepton_chiso"   , &lepton_chiso    );
+  BabyTree_->Branch("lepton_nhiso"   , &lepton_nhiso    );
+  BabyTree_->Branch("lepton_emiso"   , &lepton_emiso    );
+  BabyTree_->Branch("lepton_ncorriso"   , &lepton_ncorriso    );
+  BabyTree_->Branch("lepton_dxy"   , &lepton_dxy    );
+  BabyTree_->Branch("lepton_dz"   , &lepton_dz    );
+  BabyTree_->Branch("lepton_ip3d"   , &lepton_ip3d    );
+
   return;
 }
 
@@ -153,3 +264,4 @@ void BabyMaker::CloseBabyNtuple(){
   BabyFile_->Close();
   return;
 }
+

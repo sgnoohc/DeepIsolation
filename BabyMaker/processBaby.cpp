@@ -14,9 +14,8 @@ int main(int argc, char* argv[])
   std::cout<<"running on file: "<<infile.Data()<<std::endl;
   
   TChain *chain = new TChain("Events");
-  chain->Add(infile.Data());
-  // chain->Add("/hadoop/cms/store/group/snt/run2_50ns/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/V07-04-03/merged_ntuple_2.root");
-  // chain->Add("/hadoop/cms/store/group/snt/run2_50ns/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/V07-04-03/merged_ntuple_3.root");
+  //chain->Add(infile.Data());
+  chain->Add("/hadoop/cms/store/group/snt/run2_moriond17/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/merged_ntuple_1.root");
   if (chain->GetEntries() == 0) {
     std::cout << "ERROR: no entries in chain. filename was: " << infile << std::endl;
     return 2;
@@ -38,6 +37,4 @@ int main(int argc, char* argv[])
   BabyMaker *looper = new BabyMaker();
   looper->ScanChain(chain, sample, max_events); 
   return 0;
-
-
 }

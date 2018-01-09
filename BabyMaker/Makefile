@@ -1,4 +1,4 @@
-ROOTLIBS = $(shell root-config --libs) -lMinuit -lMLP -lXMLIO -lTMVA -lGenVector
+ROOTLIBS = $(shell root-config --libs) -lMinuit -lMLP -lXMLIO -lTMVA -lGenVector -lEG
 
 CC = g++
 CFLAGS = -g -std=c++1y

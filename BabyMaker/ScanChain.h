@@ -36,17 +36,14 @@ class BabyMaker {
     Int_t           lumi;
     ULong64_t       evt;
 
-    /*
     Int_t   lepton_flavor     ;
     Int_t   lepton_isFromW    ;
     Int_t   lepton_isFromB    ;
     Int_t   lepton_isFromC    ;
     Int_t   lepton_isFromL    ;
     Int_t   lepton_isFromLF   ;
-    */    
 
     Int_t   nvtx	         ;
-    /*
     Float_t lepton_eta           ;
     Float_t lepton_phi           ;
     Float_t lepton_pt            ;
@@ -58,6 +55,8 @@ class BabyMaker {
     Float_t lepton_dxy           ;
     Float_t lepton_dz            ;
     Float_t lepton_ip3d          ;
+
+    /*
     Int_t   lepton_nChargedPf    ;
     Int_t   lepton_nPhotonPf     ;
     Int_t   lepton_nNeutralHadPf ;
