@@ -80,7 +80,67 @@ std::vector<unsigned int> goodElecIdx()
     return good_elec_idx;
 }
 
+//double DeltaR(const LorentzVector p1, const LorentzVector p2){
+//  /*Returns the DeltaR between objects p1 and p2.*/
+//  double dphi = acos( cos( p1.phi() - p2.phi() ) );
+//  return sqrt( (p1.eta() - p2.eta())*(p1.eta() - p2.eta())+ dphi*dphi );
+//}
 
+double pTRel(const LorentzVector p1, const LorentzVector p2) {
+  return -1;
+}
+/*
+void storePFCandQuantities(int pIdx, int candIdx, LorentzVector pLep, LorentzVector pCand) {
+  if (candIdx == 0) { // charged
+    lepton_nChargedPf++;
+
+    pf_charged_pt.push_back(pCand.pt());
+    pf_charged_dR.push_back(DeltaR(pLep, pCand));
+    pf_charged_ptRel.push_back(pTRel(pLep, pCand));
+    pf_charged_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+
+    pf_charged_fromPV.push_back(cms3.pfcands_fromPV()[pIdx]);
+    pf_charged_pvAssociationQuality.push_back(cms3.pfcands_pvAssociationQuality()[pIdx]);
+  }
+
+  else if (candIdx == 1) { // photons
+    lepton_nPhotonPf++;
+
+    pf_photon_pt.push_back(pCand.pt());
+    pf_photon_dR.push_back(DeltaR(pLep, pCand));
+    pf_photon_ptRel.push_back(pTRel(pLep, pCand));
+    pf_photon_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+  }
+
+  else if (candIdx == 2) { // neutral hadrons
+    lepton_nNeutralHadPf++;
+
+    pf_neutralHad_pt.push_back(pCand.pt());
+    pf_neutralHad_dR.push_back(DeltaR(pLep, pCand));
+    pf_neutralHad_ptRel.push_back(pTRel(pLep, pCand));
+    pf_neutralHad_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+  }
+  return;
+}
+void clearPFCandQuantities() {
+  pf_charged_pt.clear();
+  pf_charged_dR.clear();
+  pf_charged_ptRel.clear();
+  pf_charged_puppiWeight.clear();
+  pf_charged_fromPV.clear()
+  pf_charged_pvAssociationQuality.clear();
+
+  pf_photon_pt.clear();
+  pf_photon_dR.clear();
+  pf_photon_ptRel.clear();
+  pf_photon_puppiWeight.clear();
+
+  pf_neutralHad_pt.clear();
+  pf_neutralHad_dR.clear();
+  pf_neutralHad_ptRel.clear();
+  pf_neutralHad_puppiWeight.clear();
+}
+*/
 
 void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
@@ -150,41 +210,115 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
       //////////////////////////
       // Loop through leptons //
       //////////////////////////
+
       for ( unsigned int lIdx = 0; lIdx < nGoodMuons + nGoodElecs; lIdx++ ) {
         unsigned int lepIdx = good_lep_idx[lIdx];
         bool isMu = lIdx < nGoodMuons;
 
         LorentzVector pLep = isMu ? cms3.mus_p4()[lepIdx] : cms3.els_p4()[lepIdx]; 
   
-        lepton_flavor = isMu ? 1 : 0;
-      
+        // Lepton info
+        lepton_flavor = isMu ? 1 : 0;      
         lepton_eta = pLep.eta();
         lepton_phi = pLep.phi();
         lepton_pt  = pLep.pt() ;
 
         int pdgid = isMu ? 13 : 11;
 
+        // Lepton truth
         lepton_isFromW = isFromW(abs(pdgid), lepIdx);
         lepton_isFromB = isFromB(abs(pdgid), lepIdx);
 	lepton_isFromC = isFromC(abs(pdgid), lepIdx);
 	lepton_isFromL = isFromLight(abs(pdgid), lepIdx);
 	lepton_isFromLF = isFromLightFake(abs(pdgid), lepIdx);
 
+        // Lepton isolation vars
         lepton_relIso03EA = isMu ? muRelIso03EA(lepIdx, 1) : eleRelIso03EA(lepIdx, 2);
         lepton_chiso = isMu ? cms3.mus_isoR03_pf_ChargedHadronPt()[lepIdx] : cms3.els_pfChargedHadronIso()[lepIdx];
         lepton_nhiso = isMu ? cms3.mus_isoR03_pf_NeutralHadronEt()[lepIdx] : cms3.els_pfNeutralHadronIso()[lepIdx];
         lepton_emiso = isMu ? cms3.mus_isoR03_pf_PhotonEt()[lepIdx] : cms3.els_pfPhotonIso()[lepIdx];
         lepton_ncorriso = lepton_nhiso + lepton_emiso - evt_fixgridfastjet_all_rho() * (isMu ? muEA03(lepIdx, 1) : elEA03(lepIdx, 2));
 
+        // Impact parameter
         lepton_dxy  = isMu ? cms3.mus_dxyPV()[lepIdx] : cms3.els_dxyPV()[lepIdx];
         lepton_dz   = isMu ? cms3.mus_dzPV()[lepIdx] : cms3.els_dzPV()[lepIdx];
         lepton_ip3d = isMu ? cms3.mus_ip3d()[lepIdx] : cms3.els_ip3d()[lepIdx];
 
+        ////////////////////////////////
+        // Loop through pf candidates //
+        ////////////////////////////////
+
+        lepton_nChargedPf    = 0;
+        lepton_nPhotonPf     = 0;
+        lepton_nNeutralHadPf = 0;
+	for ( unsigned int pIdx = 0; pIdx < cms3.pfcands_p4().size(); pIdx++ ) {
+          int pf_pdg_id = cms3.pfcands_particleId()[pIdx];
+          int pf_charge = cms3.pfcands_charge()[pIdx];
+    
+          // Identify charged/photon/neutral hadron
+          int candIdx = -1; // 0 = charged, 1 = photon, 2 = neutral hadron
+          if (abs(pf_charge) > 0) candIdx = 0;
+          else if (abs(pf_pdg_id) == 22) candIdx = 1;
+          else candIdx = 2;
+
+          LorentzVector pCand = cms3.pfcands_p4()[pIdx];
+
+          //storePFCandQuantities(pIdx, candIdx, pLep, pCand);
+          if (candIdx == 0) { // charged
+	    lepton_nChargedPf++;
+
+	    pf_charged_pt.push_back(pCand.pt());
+	    pf_charged_dR.push_back(DeltaR(pLep, pCand));
+	    pf_charged_ptRel.push_back(pTRel(pLep, pCand));
+	    pf_charged_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+
+	    pf_charged_fromPV.push_back(cms3.pfcands_fromPV()[pIdx]);
+	    pf_charged_pvAssociationQuality.push_back(cms3.pfcands_pvAssociationQuality()[pIdx]);
+	  }
+
+	  else if (candIdx == 1) { // photons
+	    lepton_nPhotonPf++;
+
+	    pf_photon_pt.push_back(pCand.pt());
+	    pf_photon_dR.push_back(DeltaR(pLep, pCand));
+	    pf_photon_ptRel.push_back(pTRel(pLep, pCand));
+	    pf_photon_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+	  }
+
+	  else if (candIdx == 2) { // neutral hadrons
+	    lepton_nNeutralHadPf++;
+
+	    pf_neutralHad_pt.push_back(pCand.pt());
+	    pf_neutralHad_dR.push_back(DeltaR(pLep, pCand));
+	    pf_neutralHad_ptRel.push_back(pTRel(pLep, pCand));
+	    pf_neutralHad_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+	  }
+
+      	  
+        } // end pf cand loop 
+
         FillBabyNtuple();
+        //clearPFCandQuantities();
+        pf_charged_pt.clear();
+	pf_charged_dR.clear();
+	pf_charged_ptRel.clear();
+	pf_charged_puppiWeight.clear();
+	pf_charged_fromPV.clear();
+	pf_charged_pvAssociationQuality.clear();
 
-        } // end lepton loop
+	pf_photon_pt.clear();
+	pf_photon_dR.clear();
+	pf_photon_ptRel.clear();
+	pf_photon_puppiWeight.clear();
 
-      } // end loop on events in file
+	pf_neutralHad_pt.clear();
+	pf_neutralHad_dR.clear();
+	pf_neutralHad_ptRel.clear();
+	pf_neutralHad_puppiWeight.clear();
+
+      } // end lepton loop
+
+    } // end loop on events in file
     delete tree;
     f.Close();
   } // end loop on files
@@ -236,6 +370,23 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lepton_dxy"   , &lepton_dxy    );
   BabyTree_->Branch("lepton_dz"   , &lepton_dz    );
   BabyTree_->Branch("lepton_ip3d"   , &lepton_ip3d    );
+
+  BabyTree_->Branch("pf_charged_pt"   , &pf_charged_pt    );
+  BabyTree_->Branch("pf_charged_dR"   , &pf_charged_dR    );
+  BabyTree_->Branch("pf_charged_ptRel"   , &pf_charged_ptRel    );
+  BabyTree_->Branch("pf_charged_puppiWeight"   , &pf_charged_puppiWeight    );
+  BabyTree_->Branch("pf_charged_fromPV"   , &pf_charged_fromPV    );
+  BabyTree_->Branch("pf_charged_pvAssociationQuality"   , &pf_charged_pvAssociationQuality    );
+
+  BabyTree_->Branch("pf_photon_pt"   , &pf_photon_pt    );
+  BabyTree_->Branch("pf_photon_dR"   , &pf_photon_dR    );
+  BabyTree_->Branch("pf_photon_ptRel"   , &pf_photon_ptRel    );
+  BabyTree_->Branch("pf_photon_puppiWeight"   , &pf_photon_puppiWeight    );
+
+  BabyTree_->Branch("pf_neutralHad_pt"   , &pf_neutralHad_pt    );
+  BabyTree_->Branch("pf_neutralHad_dR"   , &pf_neutralHad_dR    );
+  BabyTree_->Branch("pf_neutralHad_ptRel"   , &pf_neutralHad_ptRel    );
+  BabyTree_->Branch("pf_neutralHad_puppiWeight"   , &pf_neutralHad_puppiWeight    );
 
   return;
 }
