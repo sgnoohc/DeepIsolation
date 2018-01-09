@@ -80,67 +80,16 @@ std::vector<unsigned int> goodElecIdx()
     return good_elec_idx;
 }
 
-//double DeltaR(const LorentzVector p1, const LorentzVector p2){
-//  /*Returns the DeltaR between objects p1 and p2.*/
-//  double dphi = acos( cos( p1.phi() - p2.phi() ) );
-//  return sqrt( (p1.eta() - p2.eta())*(p1.eta() - p2.eta())+ dphi*dphi );
-//}
-
 double pTRel(const LorentzVector p1, const LorentzVector p2) {
-  return -1;
+  //return p2.Angle(p1);
+  double mag1(0), mag2(0), dot(0);
+  mag1 = (p1.px()*p1.px()) + (p1.py()*p1.py())  + (p1.pz()*p1.pz());
+  mag2 = (p2.px()*p2.px()) + (p2.py()*p2.py())  + (p2.pz()*p2.pz());  
+  dot =  (p1.px()*p2.px()) + (p1.py()*p2.py())  + (p1.pz()*p2.pz());
+  double cosTheta = ( dot / sqrt(mag1*mag2));
+  double sinTheta = sqrt(1 - pow(cosTheta, 2));
+  return mag2 * sinTheta;
 }
-/*
-void storePFCandQuantities(int pIdx, int candIdx, LorentzVector pLep, LorentzVector pCand) {
-  if (candIdx == 0) { // charged
-    lepton_nChargedPf++;
-
-    pf_charged_pt.push_back(pCand.pt());
-    pf_charged_dR.push_back(DeltaR(pLep, pCand));
-    pf_charged_ptRel.push_back(pTRel(pLep, pCand));
-    pf_charged_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
-
-    pf_charged_fromPV.push_back(cms3.pfcands_fromPV()[pIdx]);
-    pf_charged_pvAssociationQuality.push_back(cms3.pfcands_pvAssociationQuality()[pIdx]);
-  }
-
-  else if (candIdx == 1) { // photons
-    lepton_nPhotonPf++;
-
-    pf_photon_pt.push_back(pCand.pt());
-    pf_photon_dR.push_back(DeltaR(pLep, pCand));
-    pf_photon_ptRel.push_back(pTRel(pLep, pCand));
-    pf_photon_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
-  }
-
-  else if (candIdx == 2) { // neutral hadrons
-    lepton_nNeutralHadPf++;
-
-    pf_neutralHad_pt.push_back(pCand.pt());
-    pf_neutralHad_dR.push_back(DeltaR(pLep, pCand));
-    pf_neutralHad_ptRel.push_back(pTRel(pLep, pCand));
-    pf_neutralHad_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
-  }
-  return;
-}
-void clearPFCandQuantities() {
-  pf_charged_pt.clear();
-  pf_charged_dR.clear();
-  pf_charged_ptRel.clear();
-  pf_charged_puppiWeight.clear();
-  pf_charged_fromPV.clear()
-  pf_charged_pvAssociationQuality.clear();
-
-  pf_photon_pt.clear();
-  pf_photon_dR.clear();
-  pf_photon_ptRel.clear();
-  pf_photon_puppiWeight.clear();
-
-  pf_neutralHad_pt.clear();
-  pf_neutralHad_dR.clear();
-  pf_neutralHad_ptRel.clear();
-  pf_neutralHad_puppiWeight.clear();
-}
-*/
 
 void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
