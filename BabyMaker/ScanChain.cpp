@@ -107,7 +107,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
   int nDuplicates = 0;
   int nEvents = chain->GetEntries();
-  int nLeptons = 0
+  int nLeptons = 0;
   unsigned int nEventsChain = nEvents;
   cout << "Running on " << nEventsChain << " events" << endl;
   unsigned int nEventsTotal = 0;
