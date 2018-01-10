@@ -40,6 +40,8 @@
 using namespace std;
 using namespace tas;
 
+const double coneSize = 1.0;
+
 // "Good" mu/el id functions taken from Philip's old babymaker
 //_________________________________________________________________________________________________
 // Returns a vector of indices for good loose muons in CMS3.
@@ -90,6 +92,11 @@ double pTRel(const LorentzVector p1, const LorentzVector p2) {
   double sinTheta = sqrt(1 - pow(cosTheta, 2));
   return mag2 * sinTheta;
 }
+
+bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,float>& pair2 ) {
+  return pair1.second > pair2.second;
+}
+
 
 void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
@@ -200,7 +207,34 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         lepton_nChargedPf    = 0;
         lepton_nPhotonPf     = 0;
         lepton_nNeutralHadPf = 0;
+
+        std::vector<Float_t> unordered_pf_charged_pt                     ;
+	std::vector<Float_t> unordered_pf_charged_dR                     ;
+	std::vector<Float_t> unordered_pf_charged_ptRel                  ;
+	std::vector<Float_t> unordered_pf_charged_puppiWeight            ;
+	std::vector<Int_t>   unordered_pf_charged_fromPV                 ;
+	std::vector<Int_t>   unordered_pf_charged_pvAssociationQuality   ;
+
+	std::vector<Float_t> unordered_pf_photon_pt          ;
+	std::vector<Float_t> unordered_pf_photon_dR          ;
+	std::vector<Float_t> unordered_pf_photon_ptRel       ;
+	std::vector<Float_t> unordered_pf_photon_puppiWeight ;
+
+	std::vector<Float_t> unordered_pf_neutralHad_pt          ;
+	std::vector<Float_t> unordered_pf_neutralHad_dR          ;
+	std::vector<Float_t> unordered_pf_neutralHad_ptRel       ;
+	std::vector<Float_t> unordered_pf_neutralHad_puppiWeight ;
+
+	std::vector<std::pair<int, float> > charged_pt_ordering;
+	std::vector<std::pair<int, float> > photon_pt_ordering;
+	std::vector<std::pair<int, float> > neutralHad_pt_ordering;
+
+
 	for ( unsigned int pIdx = 0; pIdx < cms3.pfcands_p4().size(); pIdx++ ) {
+	  LorentzVector pCand = cms3.pfcands_p4()[pIdx];
+ 	  double dR = DeltaR(pLep, pCand);
+          if (dR > coneSize) continue;
+ 
           int pf_pdg_id = cms3.pfcands_particleId()[pIdx];
           int pf_charge = cms3.pfcands_charge()[pIdx];
     
@@ -210,44 +244,73 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           else if (abs(pf_pdg_id) == 22) candIdx = 1;
           else candIdx = 2;
 
-          LorentzVector pCand = cms3.pfcands_p4()[pIdx];
-
-          //storePFCandQuantities(pIdx, candIdx, pLep, pCand);
           if (candIdx == 0) { // charged
+	    charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, pCand.pt()));
 	    lepton_nChargedPf++;
 
-	    pf_charged_pt.push_back(pCand.pt());
-	    pf_charged_dR.push_back(DeltaR(pLep, pCand));
-	    pf_charged_ptRel.push_back(pTRel(pLep, pCand));
-	    pf_charged_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+	    unordered_pf_charged_pt.push_back(pCand.pt());
+	    unordered_pf_charged_dR.push_back(DeltaR(pLep, pCand));
+	    unordered_pf_charged_ptRel.push_back(pTRel(pLep, pCand));
+	    unordered_pf_charged_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
 
-	    pf_charged_fromPV.push_back(cms3.pfcands_fromPV()[pIdx]);
-	    pf_charged_pvAssociationQuality.push_back(cms3.pfcands_pvAssociationQuality()[pIdx]);
+	    unordered_pf_charged_fromPV.push_back(cms3.pfcands_fromPV()[pIdx]);
+	    unordered_pf_charged_pvAssociationQuality.push_back(cms3.pfcands_pvAssociationQuality()[pIdx]);
 	  }
 
 	  else if (candIdx == 1) { // photons
+            photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pCand.pt()));
 	    lepton_nPhotonPf++;
 
-	    pf_photon_pt.push_back(pCand.pt());
-	    pf_photon_dR.push_back(DeltaR(pLep, pCand));
-	    pf_photon_ptRel.push_back(pTRel(pLep, pCand));
-	    pf_photon_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+	    unordered_pf_photon_pt.push_back(pCand.pt());
+	    unordered_pf_photon_dR.push_back(DeltaR(pLep, pCand));
+	    unordered_pf_photon_ptRel.push_back(pTRel(pLep, pCand));
+	    unordered_pf_photon_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
 	  }
 
 	  else if (candIdx == 2) { // neutral hadrons
+	    neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pCand.pt()));
 	    lepton_nNeutralHadPf++;
 
-	    pf_neutralHad_pt.push_back(pCand.pt());
-	    pf_neutralHad_dR.push_back(DeltaR(pLep, pCand));
-	    pf_neutralHad_ptRel.push_back(pTRel(pLep, pCand));
-	    pf_neutralHad_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+	    unordered_pf_neutralHad_pt.push_back(pCand.pt());
+	    unordered_pf_neutralHad_dR.push_back(DeltaR(pLep, pCand));
+	    unordered_pf_neutralHad_ptRel.push_back(pTRel(pLep, pCand));
+	    unordered_pf_neutralHad_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
 	  }
 
-      	  
         } // end pf cand loop 
 
+	// Sort charged pf cands
+	std::sort(charged_pt_ordering.begin(), charged_pt_ordering.end(), sortByValue);
+        for (std::vector<std::pair<int, float> >::iterator it = charged_pt_ordering.begin(); it != charged_pt_ordering.end(); ++it) {
+          pf_charged_pt.push_back(unordered_pf_charged_pt.at(it->first));
+          pf_charged_dR.push_back(unordered_pf_charged_dR.at(it->first));
+          pf_charged_ptRel.push_back(unordered_pf_charged_ptRel.at(it->first));
+          pf_charged_puppiWeight.push_back(unordered_pf_charged_puppiWeight.at(it->first));
+
+          pf_charged_fromPV.push_back(unordered_pf_charged_fromPV.at(it->first));
+          pf_charged_pvAssociationQuality.push_back(unordered_pf_charged_pvAssociationQuality.at(it->first));
+        }
+       
+	// Sort photon cands
+	std::sort(photon_pt_ordering.begin(), photon_pt_ordering.end(), sortByValue);
+        for (std::vector<std::pair<int, float> >::iterator it = photon_pt_ordering.begin(); it != photon_pt_ordering.end(); ++it) {
+          pf_photon_pt.push_back(unordered_pf_photon_pt.at(it->first));
+          pf_photon_dR.push_back(unordered_pf_photon_dR.at(it->first));
+          pf_photon_ptRel.push_back(unordered_pf_photon_ptRel.at(it->first));
+          pf_photon_puppiWeight.push_back(unordered_pf_photon_puppiWeight.at(it->first));
+        }
+
+	// Sort neutral hads
+	std::sort(neutralHad_pt_ordering.begin(), neutralHad_pt_ordering.end(), sortByValue);
+        for (std::vector<std::pair<int, float> >::iterator it = neutralHad_pt_ordering.begin(); it != neutralHad_pt_ordering.end(); ++it) {
+	  pf_neutralHad_pt.push_back(unordered_pf_neutralHad_pt.at(it->first));
+          pf_neutralHad_dR.push_back(unordered_pf_neutralHad_dR.at(it->first));
+	  pf_neutralHad_ptRel.push_back(unordered_pf_neutralHad_ptRel.at(it->first));
+	  pf_neutralHad_puppiWeight.push_back(unordered_pf_neutralHad_puppiWeight.at(it->first));
+	}
+
         FillBabyNtuple();
-        //clearPFCandQuantities();
+
         pf_charged_pt.clear();
 	pf_charged_dR.clear();
 	pf_charged_ptRel.clear();
