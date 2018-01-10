@@ -229,15 +229,18 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	std::vector<std::pair<int, float> > photon_pt_ordering;
 	std::vector<std::pair<int, float> > neutralHad_pt_ordering;
 
-
+	// Begin pf cand loop
 	for ( unsigned int pIdx = 0; pIdx < cms3.pfcands_p4().size(); pIdx++ ) {
 	  LorentzVector pCand = cms3.pfcands_p4()[pIdx];
  	  double dR = DeltaR(pLep, pCand);
           if (dR > coneSize) continue;
- 
+
           int pf_pdg_id = cms3.pfcands_particleId()[pIdx];
           int pf_charge = cms3.pfcands_charge()[pIdx];
     
+	  // Check if pf cand is lepton itself
+	  if (abs(pf_pdg_id) == (isMu ? 13 : 11 ) && dR < 0.05) continue;
+
           // Identify charged/photon/neutral hadron
           int candIdx = -1; // 0 = charged, 1 = photon, 2 = neutral hadron
           if (abs(pf_charge) > 0) candIdx = 0;
