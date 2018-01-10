@@ -107,6 +107,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
   int nDuplicates = 0;
   int nEvents = chain->GetEntries();
+  int nLeptons = 0
   unsigned int nEventsChain = nEvents;
   cout << "Running on " << nEventsChain << " events" << endl;
   unsigned int nEventsTotal = 0;
@@ -312,6 +313,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	}
 
         FillBabyNtuple();
+        nLeptons++;
 
         pf_charged_pt.clear();
 	pf_charged_dR.clear();
@@ -338,9 +340,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
   } // end loop on files
 
   cout << "Processed " << nEventsTotal << " events" << endl;
-  if ( nEventsChain != nEventsTotal ) {
-    std::cout << "ERROR: number of events from files is not equal to total number of events" << std::endl;
-  }
+  cout << "Found " << nLeptons << " leptons" << endl;
 
   CloseBabyNtuple();
 
