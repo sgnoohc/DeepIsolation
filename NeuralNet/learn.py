@@ -1,44 +1,28 @@
 import keras
-import ROOT
 import numpy
-import root_numpy
 from sklearn import metrics
 
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-import utils
+npzfile = numpy.load('features.npz')
 
-# Read data from ROOT file
-f = ROOT.TFile('../BabyMaker/unknown_dummy.root')
-tree = f.Get("t")
+global_features = npzfile['global_features']
+charged_pf_features = npzfile['charged_pf_features']
+photon_pf_features = npzfile['photon_pf_features']
+neutralHad_pf_features = npzfile['neutralHad_pf_features']
+label = npzfile['label']
+relIso = npzfile['relIso']
 
-branches = ['lepton_isFromW', 'lepton_pt', 'lepton_eta', 'lepton_phi', 'lepton_relIso03EA', 'lepton_chiso', 'lepton_nhiso', 'lepton_emiso', 'lepton_ncorriso', 'lepton_dxy', 'lepton_dz', 'lepton_ip3d', 'nvtx', 'lepton_flavor', 'pf_charged_pt', 'pf_charged_dR', 'pf_charged_ptRel', 'pf_charged_puppiWeight', 'pf_charged_fromPV', 'pf_charged_pvAssociationQuality', 'pf_photon_pt', 'pf_photon_dR', 'pf_photon_ptRel', 'pf_photon_puppiWeight', 'pf_neutralHad_pt', 'pf_neutralHad_dR', 'pf_neutralHad_ptRel', 'pf_neutralHad_puppiWeight']
-data = root_numpy.tree2array(tree, branches = branches)
+n_global_features = len(global_features[0])
+n_charged_pf_features = len(charged_pf_features[0][0])
+n_photon_pf_features = len(photon_pf_features[0][0])
+n_neutralHad_pf_features = len(neutralHad_pf_features[0][0])
 
-# Grab features
-global_features = numpy.array([data['lepton_pt'], data['lepton_eta'], data['lepton_phi'], data['lepton_relIso03EA'], data['lepton_chiso'], data['lepton_nhiso'], data['lepton_emiso'], data['lepton_ncorriso'], data['lepton_dxy'], data['lepton_dz'], data['lepton_ip3d'], data['nvtx'], data['lepton_flavor']])
-#charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'], data['pf_charged_ptRel'], data['pf_charged_puppiWeight'], data['pf_charged_fromPV'], data['pf_charged_pvAssociationQuality']])
-#photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_ptRel'], data['pf_photon_puppiWeight']])
-f
-#neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_ptRel'], data['pf_neutralHad_puppiWeight']])
-charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'], data['pf_charged_puppiWeight'], data['pf_charged_fromPV'], data['pf_charged_pvAssociationQuality']])
-photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_puppiWeight']])
-f
-neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_puppiWeight']])
-label = data['lepton_isFromW']
-
-n_global_features = len(global_features)
-n_charged_pf_features = len(charged_pf_features)
-n_photon_pf_features = len(photon_pf_features)
-n_neutralHad_pf_features = len(neutralHad_pf_features)
-
-# Reorganize features
-global_features = numpy.transpose(global_features)
-charged_pf_features, charged_pf_timestep = utils.padArray(charged_pf_features)
-photon_pf_features, photon_pf_timestep = utils.padArray(photon_pf_features)
-neutralHad_pf_features, neutralHad_pf_timestep = utils.padArray(neutralHad_pf_features)
+charged_pf_timestep = len(charged_pf_features[0])
+photon_pf_timestep = len(photon_pf_features[0])
+neutralHad_pf_timestep = len(neutralHad_pf_features[0])
 
 # Structure NN
 input_charged_pf = keras.layers.Input(shape=(charged_pf_timestep, n_charged_pf_features), name = 'charged_pf')
@@ -61,13 +45,12 @@ model.compile(optimizer = 'adam', loss = 'binary_crossentropy')
 
 # Train & Test
 nTrain = 5000
-nEpochs = 10
+nEpochs = 50
 nBatch = 1000
 
 model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch)
 prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
 
-relIso = data['lepton_relIso03EA']
 relIso = relIso[nTrain:]*(-1)
 
 fpr_re, tpr_re, thresh = metrics.roc_curve(data['lepton_isFromW'][nTrain:], relIso, pos_label = 1)
