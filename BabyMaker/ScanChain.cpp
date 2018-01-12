@@ -385,6 +385,10 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lepton_dz"   , &lepton_dz    );
   BabyTree_->Branch("lepton_ip3d"   , &lepton_ip3d    );
 
+  BabyTree_->Branch("lepton_nChargedPf", &lepton_nChargedPf);
+  BabyTree_->Branch("lepton_nPhotonPf", &lepton_nPhotonPf);
+  BabyTree_->Branch("lepton_nNeutralHadPf", &lepton_nNeutralHadPf);
+
   BabyTree_->Branch("pf_charged_pt"   , &pf_charged_pt    );
   BabyTree_->Branch("pf_charged_dR"   , &pf_charged_dR    );
   BabyTree_->Branch("pf_charged_ptRel"   , &pf_charged_ptRel    );
