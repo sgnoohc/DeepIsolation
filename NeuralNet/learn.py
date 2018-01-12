@@ -53,8 +53,8 @@ prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTr
 
 relIso = relIso[nTrain:]*(-1)
 
-fpr_re, tpr_re, thresh = metrics.roc_curve(data['lepton_isFromW'][nTrain:], relIso, pos_label = 1)
-fpr, tpr, thresh = metrics.roc_curve(data['lepton_isFromW'][nTrain:], prediction, pos_label = 1)
+fpr_re, tpr_re, thresh = metrics.roc_curve(label[nTrain:], relIso, pos_label = 1)
+fpr, tpr, thresh = metrics.roc_curve(label[nTrain:], prediction, pos_label = 1)
 plt.figure()
 plt.plot(fpr_re, tpr_re, color='darkred', lw=2, label='RelIso')
 plt.plot(fpr, tpr, color = 'darkorange', lw=2, label='MLP')
