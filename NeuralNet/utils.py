@@ -14,3 +14,17 @@ def padArray(array):
 
   return y, maxCands
 
+def preprocess(array):
+  if onlyZerosAndOnes(array): # don't preprocess array if it contains only 0's and 1's (e.g. lepton_flavor).
+    return array 
+  mean = numpy.mean(array)
+  std = numpy.std(array)
+  array += -mean
+  array *= 1/std
+  return array
+
+def onlyZerosAndOnes(array):
+  for element in array:
+    if not (element == 0 or element == 1):
+      return False
+  return True

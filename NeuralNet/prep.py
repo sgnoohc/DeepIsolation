@@ -25,8 +25,17 @@ charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'],
 photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_puppiWeight']])
 f
 neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_puppiWeight']])
+
 label = data['lepton_isFromW']
 relIso = data['lepton_relIso03EA']
+
+# Preprocess
+for feature in global_features:
+  feature = utils.preprocess(feature)
+
+#for feature in charged_pf_features:
+#  feature = utils.preprocess_pf(feature)
+  
 
 n_global_features = len(global_features)
 n_charged_pf_features = len(charged_pf_features)
