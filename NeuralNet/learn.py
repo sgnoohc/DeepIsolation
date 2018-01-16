@@ -26,40 +26,48 @@ charged_pf_timestep = len(charged_pf_features[0])
 photon_pf_timestep = len(photon_pf_features[0])
 neutralHad_pf_timestep = len(neutralHad_pf_features[0])
 
-# Structure NN
+################
+# Structure NN #
+################
+
+# Inputs
 input_charged_pf = keras.layers.Input(shape=(charged_pf_timestep, n_charged_pf_features), name = 'charged_pf')
 input_photon_pf = keras.layers.Input(shape=(photon_pf_timestep, n_photon_pf_features), name = 'photon_pf')
 input_neutralHad_pf = keras.layers.Input(shape=(neutralHad_pf_timestep, n_neutralHad_pf_features), name = 'neutralHad_pf')
 input_global = keras.layers.Input(shape=(n_global_features,), name = 'global')
 
-conv_charged_pf = keras.layers.Convolution1D(32, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_charged_pf_0')(input_charged_pf)
-conv_charged_pf = keras.layers.Convolution1D(16, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_charged_pf_1')(conv_charged_pf)
-conv_charged_pf = keras.layers.Convolution1D(4, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_charged_pf_2')(conv_charged_pf)
+# Convolutional layers for pf cands
+conv_charged_pf = keras.layers.Convolution1D(32, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_charged_pf_1')(input_charged_pf)
+conv_charged_pf = keras.layers.Convolution1D(16, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_charged_pf_2')(conv_charged_pf)
+conv_charged_pf = keras.layers.Convolution1D(16, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_charged_pf_3')(conv_charged_pf)
+conv_charged_pf = keras.layers.Convolution1D(4, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_charged_pf_4')(conv_charged_pf)
 
-conv_photon_pf = keras.layers.Convolution1D(32, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_0')(input_photon_pf)
-conv_photon_pf = keras.layers.Convolution1D(16, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_1')(conv_photon_pf)
-conv_photon_pf = keras.layers.Convolution1D(4, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_2')(conv_photon_pf)
+conv_photon_pf = keras.layers.Convolution1D(24, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_1')(input_photon_pf)
+conv_photon_pf = keras.layers.Convolution1D(12, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_2')(conv_photon_pf)
+conv_photon_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_3')(conv_photon_pf)
 
-conv_neutralHad_pf = keras.layers.Convolution1D(32, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_0')(input_neutralHad_pf)
-conv_neutralHad_pf = keras.layers.Convolution1D(16, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_1')(conv_neutralHad_pf)
-conv_neutralHad_pf = keras.layers.Convolution1D(4, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_2')(conv_neutralHad_pf)
+conv_neutralHad_pf = keras.layers.Convolution1D(24, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_1')(input_neutralHad_pf)
+conv_neutralHad_pf = keras.layers.Convolution1D(12, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_2')(conv_neutralHad_pf)
+conv_neutralHad_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_3')(conv_neutralHad_pf)
 
+# LSTMs for pf cands
 #lstm_charged_pf = keras.layers.LSTM(100, return_sequences=True)(input_charged_pf)
 #lstm_charged_pf = keras.layers.LSTM(100, return_sequences=True)(input_charged_pf)
 #lstm_charged_pf = keras.layers.LSTM(100, return_sequences=True)(input_charged_pf)
 #lstm_charged_pf = keras.layers.LSTM(100, return_sequences=True)(input_charged_pf)
-lstm_charged_pf = keras.layers.LSTM(100)(conv_charged_pf)
+lstm_charged_pf = keras.layers.LSTM(100, implementation = 2, name ='lstm_charged_pf_1')(conv_charged_pf)
 #lstm_photon_pf = keras.layers.LSTM(50, return_sequences=True)(input_photon_pf)
 #lstm_photon_pf = keras.layers.LSTM(50, return_sequences=True)(input_photon_pf)
 #lstm_photon_pf = keras.layers.LSTM(50, return_sequences=True)(input_photon_pf)
 #lstm_photon_pf = keras.layers.LSTM(50, return_sequences=True)(input_photon_pf)
-lstm_photon_pf = keras.layers.LSTM(50)(conv_photon_pf)
+lstm_photon_pf = keras.layers.LSTM(50, implementation = 2, name = 'lstm_photon_pf_1')(conv_photon_pf)
 #lstm_neutralHad_pf = keras.layers.LSTM(50, return_sequences=True)(input_neutralHad_pf)
 #lstm_neutralHad_pf = keras.layers.LSTM(50, return_sequences=True)(input_neutralHad_pf)
 #lstm_neutralHad_pf = keras.layers.LSTM(50, return_sequences=True)(input_neutralHad_pf)
 #lstm_neutralHad_pf = keras.layers.LSTM(50, return_sequences=True)(input_neutralHad_pf)
-lstm_neutralHad_pf = keras.layers.LSTM(50)(conv_neutralHad_pf)
+lstm_neutralHad_pf = keras.layers.LSTM(50, implementation = 2, name = 'lstm_neutralHad_pf_1')(conv_neutralHad_pf)
 
+# MLP to combine LSTM outputs with global features
 merged_features = keras.layers.concatenate([lstm_charged_pf, lstm_photon_pf, lstm_neutralHad_pf, input_global])
 deep_layer = keras.layers.Dense(200, activation = 'relu', kernel_initializer = 'lecun_uniform')(merged_features)
 deep_layer = keras.layers.Dense(100, activation = 'relu', kernel_initializer = 'lecun_uniform')(deep_layer)
@@ -74,7 +82,7 @@ model.compile(optimizer = 'adam', loss = 'binary_crossentropy')
 
 # Train & Test
 nTrain = 400000
-nEpochs = 5
+nEpochs = 15
 nBatch = 10000
 
 
