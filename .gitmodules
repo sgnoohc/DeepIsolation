@@ -1,3 +1,6 @@
 [submodule "CORE"]
 	path = CORE
 	url = https://github.com/cmstas/CORE
+[submodule "NtupleTools"]
+	path = NtupleTools
+	url = https://github.com/cmstas/NtupleTools
