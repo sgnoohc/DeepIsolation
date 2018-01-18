@@ -259,6 +259,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           else candIdx = 2;
 
           if (candIdx == 0) { // charged
+	    //charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, DeltaR(pLep, pCand)));
 	    charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, pCand.pt()));
 	    lepton_nChargedPf++;
 
@@ -273,6 +274,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	  }
 
 	  else if (candIdx == 1) { // photons
+	    //photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pCand.pt()));
             photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pCand.pt()));
 	    lepton_nPhotonPf++;
 
@@ -284,6 +286,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	  }
 
 	  else if (candIdx == 2) { // neutral hadrons
+	    //neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pCand.pt()));
 	    neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pCand.pt()));
 	    lepton_nNeutralHadPf++;
 

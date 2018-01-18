@@ -15,6 +15,18 @@ def padArray(array):
 
   return y, maxCands
 
+def padArray(array, maxCands):
+  nData = len(array[0])
+  nFeatures = len(array)
+  
+  y = numpy.zeros((nData, maxCands, nFeatures))
+  for i in range(nData):
+    for j in range(nFeatures):
+      for k in range(len(array[j][i])):
+        y[i][k][j] = array[j][i][k]
+
+  return y
+
 def preprocess(array):
   if onlyZerosAndOnes(array): # don't preprocess array if it contains only 0's and 1's (e.g. lepton_flavor).
     return array 
@@ -25,18 +37,14 @@ def preprocess(array):
   return array
 
 def preprocess_pf(array, idx):
-  if array.dtype == 'int32' or array.dtype == 'int64':
-    return array
   tempArray = []
   for element in array:
     for subElement in element:
-      #if idx == 0 or idx == 3: # for pT and pTRel 
-      #  subElement = math.log(subElement)
       tempArray.append(subElement)
-  mean = numpy.mean(tempArray)
   std = numpy.std(tempArray)
-  array += -mean
   array *= 1/std
+  mean = numpy.mean(tempArray)
+  array += -mean
   return array
 
 def onlyZerosAndOnes(array):
