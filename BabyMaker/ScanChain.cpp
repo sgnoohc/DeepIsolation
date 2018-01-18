@@ -40,7 +40,7 @@
 using namespace std;
 using namespace tas;
 
-const double coneSize = 1.0;
+const double coneSize = 0.5;
 
 // "Good" mu/el id functions taken from Philip's old babymaker
 //_________________________________________________________________________________________________
