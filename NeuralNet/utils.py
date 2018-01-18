@@ -1,7 +1,7 @@
 import numpy
 import math
 
-def padArray(array):
+def padArray_v1(array):
   lengths = [len(X) for X in array[0]]
   maxCands = max(lengths)
   nData = len(array[0])
