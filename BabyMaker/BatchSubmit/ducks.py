@@ -1,4 +1,5 @@
 import sys, os
+import time
 
 from metis.Sample import DirectorySample
 from metis.CondorTask import CondorTask
