@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import utils
 import generator
 
-npzfile = numpy.load('prep/features_test_0.npz')
+npzfile = numpy.load('/hadoop/cms/store/user/smay/DeepIsolation/features/features_test_0.npz')
 
 global_features = npzfile['global_features']
 charged_pf_features = npzfile['charged_pf_features']
@@ -52,17 +52,17 @@ conv_charged_pf = keras.layers.Convolution1D(16, 1, kernel_initializer = 'lecun_
 conv_charged_pf = keras.layers.Dropout(dropout_rate, name = 'cpf_dropout_3')(conv_charged_pf)
 conv_charged_pf = keras.layers.Convolution1D(4, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_charged_pf_4')(conv_charged_pf)
 
-conv_photon_pf = keras.layers.Convolution1D(32, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_1')(input_photon_pf)
+conv_photon_pf = keras.layers.Convolution1D(24, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_1')(input_photon_pf)
 conv_photon_pf = keras.layers.Dropout(dropout_rate, name = 'ppf_dropout_1')(conv_photon_pf)
-conv_photon_pf = keras.layers.Convolution1D(16, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_2')(conv_photon_pf)
+conv_photon_pf = keras.layers.Convolution1D(12, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_2')(conv_photon_pf)
 conv_photon_pf = keras.layers.Dropout(dropout_rate, name = 'ppf_dropout_2')(conv_photon_pf)
-conv_photon_pf = keras.layers.Convolution1D(4, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_3')(conv_photon_pf)
+conv_photon_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_3')(conv_photon_pf)
 
-conv_neutralHad_pf = keras.layers.Convolution1D(32, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_1')(input_neutralHad_pf)
+conv_neutralHad_pf = keras.layers.Convolution1D(24, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_1')(input_neutralHad_pf)
 conv_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'npf_dropout_1')(conv_neutralHad_pf)
-conv_neutralHad_pf = keras.layers.Convolution1D(16, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_2')(conv_neutralHad_pf)
+conv_neutralHad_pf = keras.layers.Convolution1D(12, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_2')(conv_neutralHad_pf)
 conv_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'npf_dropout_2')(conv_neutralHad_pf)
-conv_neutralHad_pf = keras.layers.Convolution1D(4, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_3')(conv_neutralHad_pf)
+conv_neutralHad_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_3')(conv_neutralHad_pf)
 
 # LSTMs for pf cands
 batch_momentum = 0.6
@@ -75,7 +75,7 @@ lstm_photon_pf = keras.layers.LSTM(50, implementation = 2, name = 'lstm_photon_p
 lstm_photon_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_photon_pf_batchnorm')(lstm_photon_pf)
 lstm_photon_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_photon_pf_dropout')(lstm_photon_pf)
 
-lstm_neutralHad_pf = keras.layers.LSTM(50, implementation = 2, name = 'lstm_neutralHad_pf_1')(conv_neutralHad_pf)
+lstm_neutralHad_pf = keras.layers.LSTM(25, implementation = 2, name = 'lstm_neutralHad_pf_1')(conv_neutralHad_pf)
 lstm_neutralHad_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_neutralHad_pf_batchnorm')(lstm_neutralHad_pf)
 lstm_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_neutralHad_pf_dropout')(lstm_neutralHad_pf)
 
@@ -103,7 +103,7 @@ nTrain = generator.nEvents_train()
 print(nTrain)
 nTest = 50000
 nEpochs = 15
-nBatch = 10000
+nBatch = 5000
 
 
 #model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch)

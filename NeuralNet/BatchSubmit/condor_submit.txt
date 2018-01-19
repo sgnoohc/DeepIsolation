@@ -6,8 +6,8 @@ Universe = vanilla
 Requirements = HAS_SINGULARITY == True
 request_cpus = 1
 request_gpus = 1
-request_memory = 5 GB
-request_disk = 4 GB
+request_memory = 3 GB
+request_disk = 1 GB
 
 # Singularity settings
 +SingularityImage = "/cvmfs/singularity.opensciencegrid.org/opensciencegrid/tensorflow-gpu:latest"
@@ -18,13 +18,13 @@ Executable = wrapper.sh
 Arguments =
 
 # inputs/outputs
-transfer_input_files = learn_batch.py
+transfer_input_files = package.tar.gz
 transfer_output_files = plot.pdf
 
 # ERROR and OUTPUT are the error and output channels from your job
 # that HTCondor returns from the remote host.
 Error = logs/$(Cluster).$(Process).error
-Output = learn_batch.py
+Output = logs/$(Cluster).$(Process).out
 
 # The LOG file is where HTCondor places information about your
 # job's status, success, and resource consumption.
