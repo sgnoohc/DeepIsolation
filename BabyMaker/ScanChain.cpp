@@ -82,16 +82,6 @@ std::vector<unsigned int> goodElecIdx()
     return good_elec_idx;
 }
 
-double pTRel(const LorentzVector p1, const LorentzVector p2) {
-  double mag1(0), mag2(0), dot(0);
-  mag1 = sqrt((p1.px()*p1.px()) + (p1.py()*p1.py())  + (p1.pz()*p1.pz()));
-  mag2 = sqrt((p2.px()*p2.px()) + (p2.py()*p2.py())  + (p2.pz()*p2.pz()));  
-  dot =  (p1.px()*p2.px()) + (p1.py()*p2.py())  + (p1.pz()*p2.pz());
-  double cosTheta = ( dot / (mag1*mag2));
-  double sinTheta = sqrt(1 - pow(cosTheta, 2));
-  return mag2 * sinTheta;
-}
-
 bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,float>& pair2 ) {
   return pair1.second > pair2.second;
 }
@@ -266,7 +256,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	    unordered_pf_charged_pt.push_back(pCand.pt()/pLep.pt());
 	    unordered_pf_charged_dR.push_back(DeltaR(pLep, pCand));
             unordered_pf_charged_alpha.push_back(alpha(pLep, pCand));
-	    unordered_pf_charged_ptRel.push_back(pTRel(pLep, pCand));
+	    unordered_pf_charged_ptRel.push_back(ptRel(pCand, pLep, false));
 	    unordered_pf_charged_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
 
 	    unordered_pf_charged_fromPV.push_back(cms3.pfcands_fromPV()[pIdx]);
@@ -281,7 +271,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	    unordered_pf_photon_pt.push_back(pCand.pt()/pLep.pt());
 	    unordered_pf_photon_dR.push_back(DeltaR(pLep, pCand));
 	    unordered_pf_photon_alpha.push_back(alpha(pLep, pCand));
-	    unordered_pf_photon_ptRel.push_back(pTRel(pLep, pCand));
+	    unordered_pf_photon_ptRel.push_back(ptRel(pCand, pLep, false));
 	    unordered_pf_photon_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
 	  }
 
@@ -293,7 +283,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	    unordered_pf_neutralHad_pt.push_back(pCand.pt()/pLep.pt());
 	    unordered_pf_neutralHad_dR.push_back(DeltaR(pLep, pCand));
 	    unordered_pf_neutralHad_alpha.push_back(alpha(pLep, pCand));
-	    unordered_pf_neutralHad_ptRel.push_back(pTRel(pLep, pCand));
+	    unordered_pf_neutralHad_ptRel.push_back(ptRel(pCand, pLep, false));
 	    unordered_pf_neutralHad_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
 	  }
 
