@@ -9,18 +9,20 @@ import matplotlib.pyplot as plt
 import utils
 import glob
 
+validation_frac = 0.1 # fraction of files to use as validation (will not be trained on)
+
 # Read data from ROOT file
 filenames = glob.glob("/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIsolation_Babies/merged_ntuple_*.root")
 filenames = numpy.array(filenames)
-print(filenames)
-
-#filenames = numpy.array(["/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIsolation_Babies/merged_ntuple_4.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIsolation_Babies/merged_ntuple_2.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIsolation_Babies/merged_ntuple_3.root"])
 
 max_pf_charged = 0
 max_pf_photon = 0
 max_pf_neutralHad = 0
 
+
+# Find maximum number of pf cands (will pad arrays to that length)
 for i in range(len(filenames)):
+  print(i)
   f = ROOT.TFile(filenames[i])
   tree = f.Get("t")
 
@@ -43,6 +45,7 @@ print(max_pf_charged)
 print(max_pf_photon)
 print(max_pf_neutralHad)
 
+# Loop through root babies and save hdf5 files
 for i in range(len(filenames)):
   print('Working on file %d/%d' % (i+1, len(filenames)))
 
@@ -54,14 +57,13 @@ for i in range(len(filenames)):
 
   # Grab features
   global_features = numpy.array([data['lepton_pt'], data['lepton_eta'], data['lepton_phi'], data['lepton_relIso03EA'], data['lepton_chiso'], data['lepton_nhiso'], data['lepton_emiso'], data['lepton_ncorriso'], data['lepton_dxy'], data['lepton_dz'], data['lepton_ip3d'], data['nvtx'], data['lepton_flavor'], data['lepton_nChargedPf'], data['lepton_nPhotonPf'], data['lepton_nNeutralHadPf']])
-  #charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'], data['pf_charged_alpha'], data['pf_charged_ptRel'], data['pf_charged_puppiWeight'], data['pf_charged_fromPV'], data['pf_charged_pvAssociationQuality']])
-  #photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_alpha'], data['pf_photon_ptRel'], data['pf_photon_puppiWeight']])
+  charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'], data['pf_charged_alpha'], data['pf_charged_ptRel'], data['pf_charged_puppiWeight'], data['pf_charged_fromPV'], data['pf_charged_pvAssociationQuality']])
+  photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_alpha'], data['pf_photon_ptRel'], data['pf_photon_puppiWeight']])
   f
-  #neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_alpha'], data['pf_neutralHad_ptRel'], data['pf_neutralHad_puppiWeight']])
-  charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'], data['pf_charged_alpha'], data['pf_charged_puppiWeight'], data['pf_charged_fromPV'], data['pf_charged_pvAssociationQuality']])
-  photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_alpha'], data['pf_photon_puppiWeight']])
-  f
-  neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_alpha'], data['pf_neutralHad_puppiWeight']])
+  neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_alpha'], data['pf_neutralHad_ptRel'], data['pf_neutralHad_puppiWeight']])
+  #charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'], data['pf_charged_alpha'], data['pf_charged_puppiWeight'], data['pf_charged_fromPV'], data['pf_charged_pvAssociationQuality']])
+  #photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_alpha'], data['pf_photon_puppiWeight']])
+  #neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_alpha'], data['pf_neutralHad_puppiWeight']])
 
   label = data['lepton_isFromW']
   relIso = data['lepton_relIso03EA']
@@ -90,12 +92,17 @@ for i in range(len(filenames)):
   photon_pf_features = utils.padArray(photon_pf_features, max_pf_photon)
   neutralHad_pf_features = utils.padArray(neutralHad_pf_features, max_pf_neutralHad)
 
-  #charged_pf_features, charged_pf_timestep = utils.padArray(charged_pf_features)
-  #photon_pf_features, photon_pf_timestep = utils.padArray(photon_pf_features)
-  #neutralHad_pf_features, neutralHad_pf_timestep = utils.padArray(neutralHad_pf_features)
-
   type = 'train'
-  if i == 0:
+  if i < 5:
     type = 'test'
 
-  numpy.savez('prep/features_'+type+'_'+str(i), global_features=global_features, charged_pf_features=charged_pf_features, photon_pf_features=photon_pf_features, neutralHad_pf_features=neutralHad_pf_features, label=label, relIso=relIso)
+  f = h5py.File("prep/features_"+type+"_"+str(i)+".hdf5", "w")
+
+  dset_global = f.create_dataset("global", data=global_features)
+  dset_charged_pf = f.create_dataset("charged_pf", data=charged_pf_features)
+  dset_photon_pf = f.create_dataset("photon_pf", data=photon_pf_features)
+  dset_neutralHad_pf = f.create_dataset("neutralHad_pf", data=neutralHad_pf_features)
+  dset_label = f.create_dataset("label", data=label)
+  dset_relIso = f.create_dataset("relIso", data=relIso)
+
+  f.close()
