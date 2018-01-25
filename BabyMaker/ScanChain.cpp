@@ -248,9 +248,14 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           else if (abs(pf_pdg_id) == 22) candIdx = 1;
           else candIdx = 2;
 
+	  bool orderByPt = false; // true = order by pT, false = order by pTRel
+
           if (candIdx == 0) { // charged
 	    //charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, DeltaR(pLep, pCand)));
-	    charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, pCand.pt()));
+	    if (orderByPt)
+	      charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, pCand.pt()));
+	    else
+              charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, ptRel(pCand, pLep, false)));
 	    lepton_nChargedPf++;
 
 	    unordered_pf_charged_pt.push_back(pCand.pt()/pLep.pt());
@@ -265,7 +270,10 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
 	  else if (candIdx == 1) { // photons
 	    //photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pCand.pt()));
-            photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pCand.pt()));
+	    if (orderByPt)
+              photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pCand.pt()));
+            else
+              photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, ptRel(pCand, pLep, false)));
 	    lepton_nPhotonPf++;
 
 	    unordered_pf_photon_pt.push_back(pCand.pt()/pLep.pt());
@@ -277,7 +285,10 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
 	  else if (candIdx == 2) { // neutral hadrons
 	    //neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pCand.pt()));
-	    neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pCand.pt()));
+	    if (orderByPt)
+              neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pCand.pt()));
+            else
+              neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, ptRel(pCand, pLep, false)));
 	    lepton_nNeutralHadPf++;
 
 	    unordered_pf_neutralHad_pt.push_back(pCand.pt()/pLep.pt());
