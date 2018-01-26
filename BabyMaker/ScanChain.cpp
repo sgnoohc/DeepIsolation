@@ -41,6 +41,9 @@ using namespace std;
 using namespace tas;
 
 const double coneSize = 0.5;
+const int nAnnuli = 8;
+const double coneSizeAnnuli = 1.0;
+
 
 // "Good" mu/el id functions taken from Philip's old babymaker
 //_________________________________________________________________________________________________
@@ -230,10 +233,21 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	std::vector<std::pair<int, float> > photon_pt_ordering;
 	std::vector<std::pair<int, float> > neutralHad_pt_ordering;
 
+	pf_annuli_energy.reserve(nAnnuli);	
+        for (int i = 0; i < nAnnuli; i++)
+          pf_annuli_energy[i] = 0;
+
+        TH1D* hR = new TH1D("hR", "", nAnnuli, 0.0, coneSizeAnnuli);
+
 	// Begin pf cand loop
 	for ( unsigned int pIdx = 0; pIdx < cms3.pfcands_p4().size(); pIdx++ ) {
 	  LorentzVector pCand = cms3.pfcands_p4()[pIdx];
  	  double dR = DeltaR(pLep, pCand);
+          if (dR < coneSizeAnnuli) {
+            int idx = (hR->FindBin(dR))-1;
+            pf_annuli_energy[idx] += pCand.pt();
+          }
+
           if (dR > coneSize) continue;
 
           int pf_pdg_id = cms3.pfcands_particleId()[pIdx];
@@ -296,6 +310,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	  }
 
         } // end pf cand loop 
+	delete hR;
 
 	// Sort charged pf cands
 	std::sort(charged_pt_ordering.begin(), charged_pt_ordering.end(), sortByValue);

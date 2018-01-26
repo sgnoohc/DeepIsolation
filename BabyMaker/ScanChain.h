@@ -79,6 +79,8 @@ class BabyMaker {
     std::vector<Float_t> pf_neutralHad_alpha       ;
     std::vector<Float_t> pf_neutralHad_ptRel       ;
     std::vector<Float_t> pf_neutralHad_puppiWeight ;
+
+    std::vector<Float_t> pf_annuli_energy;
 };
 
 #endif
