@@ -12,7 +12,8 @@ import glob
 validation_frac = 0.1 # fraction of files to use as validation (will not be trained on)
 
 # Read data from ROOT file
-filenames = glob.glob("/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIsolation_Babies/merged_ntuple_*.root")
+#filenames = glob.glob("/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIsolation_Babies/merged_ntuple_*.root")
+filenames = glob.globa("/hadoop/cms/store/user/smay/DeepIsolation/*/merged_ntuple_*.root")
 filenames = numpy.array(filenames)
 
 max_pf_charged = 0

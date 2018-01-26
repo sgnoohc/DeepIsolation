@@ -5,7 +5,9 @@ session = tf.Session(config=config)
 
 import keras
 import numpy
+import sys
 from sklearn import metrics
+import h5py
 
 import matplotlib
 matplotlib.use('Agg')
@@ -14,14 +16,23 @@ import matplotlib.pyplot as plt
 import utils
 import generator
 
-npzfile = numpy.load('prep/features_test_0.npz')
+if len(sys.argv) != 3:
+  print('Incorrect number of arguments')
+  print('Arg 1: save name')
+  print('Arg 2: number of training events')
+  exit(1)
 
-global_features = npzfile['global_features']
-charged_pf_features = npzfile['charged_pf_features']
-photon_pf_features = npzfile['photon_pf_features']
-neutralHad_pf_features = npzfile['neutralHad_pf_features']
-label = npzfile['label']
-relIso = npzfile['relIso']
+savename = str(sys.argv[1])
+nTrain = int(sys.argv[2])
+
+f = h5py.File('prep/features_test_0.hdf5')
+
+global_features = f['global_features']
+charged_pf_features = f['charged_pf_features']
+photon_pf_features = f['photon_pf_features']
+neutralHad_pf_features = f['neutralHad_pf_features']
+label = f['label']
+relIso = f['relIso']
 
 n_global_features = len(global_features[0])
 n_charged_pf_features = len(charged_pf_features[0][0])
@@ -76,11 +87,11 @@ lstm_charged_pf = keras.layers.LSTM(150, implementation = 2, name ='lstm_charged
 lstm_charged_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_charged_pf_batchnorm')(lstm_charged_pf)
 lstm_charged_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_charged_pf_dropout')(lstm_charged_pf)
 
-lstm_photon_pf = keras.layers.LSTM(50, implementation = 2, name = 'lstm_photon_pf_1')(conv_photon_pf)
+lstm_photon_pf = keras.layers.LSTM(100, implementation = 2, name = 'lstm_photon_pf_1')(conv_photon_pf)
 lstm_photon_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_photon_pf_batchnorm')(lstm_photon_pf)
 lstm_photon_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_photon_pf_dropout')(lstm_photon_pf)
 
-lstm_neutralHad_pf = keras.layers.LSTM(25, implementation = 2, name = 'lstm_neutralHad_pf_1')(conv_neutralHad_pf)
+lstm_neutralHad_pf = keras.layers.LSTM(50, implementation = 2, name = 'lstm_neutralHad_pf_1')(conv_neutralHad_pf)
 lstm_neutralHad_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_neutralHad_pf_batchnorm')(lstm_neutralHad_pf)
 lstm_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_neutralHad_pf_dropout')(lstm_neutralHad_pf)
 
@@ -107,26 +118,24 @@ model = keras.models.Model(inputs = [input_charged_pf, input_photon_pf, input_ne
 model.compile(optimizer = 'adam', loss = 'binary_crossentropy')
 
 # Train & Test
-nTrain = generator.nEvents_train()
-#nTrain = 3000000
-print(nTrain)
-nTest = 50000
-nEpochs = 15
+nTrainAvailable = generator.nEvents_total(True)
+nTestAvailable = generator.nEvents_total(False)
+nTest = 500000
+nEpochs = 25
 nBatch = 10000
 
+print("Training on %d of %d available training events" % (nTrain, nTrainAvailable))
+print("Testing on %d of %d available testing events" % (nTest, nTestAvailable))
+print("Training for %d epochs" % nEpochs)
 
-#model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch)
-#prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
-
-#model.fit_generator(generator = generator.generate_train, steps_per_epoch = nTrain//nBatch, epochs = nEpochs)
-#prediction = model.predict_generator(generator.generate_test, steps = nTest//nBatch)
-
-model.fit_generator(generator = generator.generate_train(), steps_per_epoch = generator.nSteps_train(), epochs = nEpochs)
-#prediction = model.predict([charged_pf_features, photon_pf_features, neutralHad_pf_features, global_features], batch_size = nBatch)
-prediction = model.predict_generator(generator.generate_test(), steps = generator.nSteps_test())
-
+model.fit_generator(generator = generator.generate(True, nTrain), steps_per_epoch = generator.nSteps(True, nTrain), epochs = nEpochs)
+prediction = model.predict_generator(generator.generate(False, nTest), steps = generator.nSteps(False, nTest))
 
 relIso *= -1
+
+npzfile_bdt = numpy.load('bdt_roc.npz')
+fpr_bdt = npzfile_bdt['fpr']
+tpr_bdt = npzfile_bdt['tpr']
 
 fpr_re, tpr_re, thresh_re = metrics.roc_curve(label, relIso, pos_label = 1)
 fpr_nn, tpr_nn, thresh_nn = metrics.roc_curve(label, prediction, pos_label = 1)
@@ -140,11 +149,6 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.legend(loc='lower right')
 plt.savefig('plot.pdf')
-
-#value, idx = utils.find_nearest(thresh_re, 0.06)
-#print('RelIso = 0.06 cut: (%.3f, %.3f)' % (fpr_re[idx], tpr_re[idx]))
-#value_nn, idx_nn = utils.find_nearest(tpr_nn, tpr_re[idx])
-#print('Neural net same TPR: (%.3f, %.3f)' % (fpr_nn[idx_nn], tpr_nn[idx_nn]))
 
 value1, idx1 = utils.find_nearest(fpr_nn, 0.087)
 value2, idx2 = utils.find_nearest(tpr_nn, 0.817)
