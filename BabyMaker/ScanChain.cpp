@@ -248,10 +248,9 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           else if (abs(pf_pdg_id) == 22) candIdx = 1;
           else candIdx = 2;
 
-	  bool orderByPt = false; // true = order by pT, false = order by pTRel
+	  bool orderByPt = true; // true = order by pT, false = order by pTRel
 
           if (candIdx == 0) { // charged
-	    //charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, DeltaR(pLep, pCand)));
 	    if (orderByPt)
 	      charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, pCand.pt()));
 	    else
@@ -269,7 +268,6 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	  }
 
 	  else if (candIdx == 1) { // photons
-	    //photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pCand.pt()));
 	    if (orderByPt)
               photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pCand.pt()));
             else
@@ -284,7 +282,6 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	  }
 
 	  else if (candIdx == 2) { // neutral hadrons
-	    //neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pCand.pt()));
 	    if (orderByPt)
               neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pCand.pt()));
             else

@@ -5,7 +5,7 @@ from metis.Sample import DirectorySample
 from metis.CondorTask import CondorTask
 from metis.StatsParser import StatsParser
 
-job_tag = "DeepIsolation_Babies"
+job_tag = "DeepIso_v0.0.0"
 exec_path = "condor_exe.sh"
 tar_path = "package.tar.gz"
 hadoop_path = "DeepIsolation"
@@ -14,6 +14,17 @@ os.system("tar -czf package.tar.gz ../processBaby")
 
 dslocs = [
     [ "/TTbar", "/hadoop/cms/store/group/snt/run2_moriond17/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/" ] , 
+    [ "/TTJets_SingleLeptFromT", "/hadoop/cms/store/group/snt/run2_moriond17/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/" ] ,
+    [ "/TTJets_SingleLeptFromT_ext1", "/hadoop/cms/store/group/snt/run2_moriond17/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V08-00-16/" ] ,
+    [ "/TTJets_SingleLeptFromTBar", "/hadoop/cms/store/group/snt/run2_moriond17/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/" ] ,
+     [ "/TTJets_SingleLeptFromTBar_ext1", "/hadoop/cms/store/group/snt/run2_moriond17/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V08-00-16/" ] ,
+    [ "/TTJets_DiLept", "/hadoop/cms/store/group/snt/run2_moriond17/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/" ] ,
+    [ "/TTJets_DiLept_ext1", "/hadoop/cms/store/group/snt/run2_moriond17/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V08-00-16/" ] ,
+    [ "/TTJets_HT-600to800", "/hadoop/cms/store/group/snt/run2_moriond17/TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V08-00-16/" ] ,
+    [ "/TTJets_HT-800to1200", "/hadoop/cms/store/group/snt/run2_moriond17/TTJets_HT-800to1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V08-00-16/" ] ,
+    [ "/TTJets_HT-1200to2500", "/hadoop/cms/store/group/snt/run2_moriond17/TTJets_HT-1200to2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V08-00-16/" ] ,
+    [ "/TTJets_HT-2500toInf", "/hadoop/cms/store/group/snt/run2_moriond17/TTJets_HT-2500toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V08-00-16/" ] ,
+    [ "/TTTo2L2Nu", "/hadoop/cms/store/group/snt/run2_moriond17/TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/" ] ,
 ]
 
 total_summary = {}
@@ -24,7 +35,7 @@ while True:
                 sample = DirectorySample( dataset=ds, location=loc ),
                 open_dataset = False,
                 flush = True,
-                files_per_output = 5,
+                files_per_output = 10,
                 output_name = "merged_ntuple.root",
                 tag = job_tag,
                 cmssw_version = "CMSSW_9_2_1", # doesn't do anything
