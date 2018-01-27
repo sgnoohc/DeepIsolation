@@ -8,12 +8,14 @@ import matplotlib.pyplot as plt
 
 import utils
 import glob
+import h5py
 
-validation_frac = 0.1 # fraction of files to use as validation (will not be trained on)
+validation_frac = 0.03 # fraction of files to use as validation (will not be trained on)
+nFiles = 20
 
 # Read data from ROOT file
 #filenames = glob.glob("/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIsolation_Babies/merged_ntuple_*.root")
-filenames = glob.globa("/hadoop/cms/store/user/smay/DeepIsolation/*/merged_ntuple_*.root")
+filenames = glob.glob("/hadoop/cms/store/user/smay/DeepIsolation/*/merged_ntuple_*.root")
 filenames = numpy.array(filenames)
 
 max_pf_charged = 0
@@ -23,6 +25,9 @@ max_pf_neutralHad = 0
 
 # Find maximum number of pf cands (will pad arrays to that length)
 for i in range(len(filenames)):
+  if (i+1) >= nFiles:
+    break  
+ 
   print(i)
   f = ROOT.TFile(filenames[i])
   tree = f.Get("t")
@@ -48,6 +53,9 @@ print(max_pf_neutralHad)
 
 # Loop through root babies and save hdf5 files
 for i in range(len(filenames)):
+  if (i+1) >= nFiles:
+    break
+
   print('Working on file %d/%d' % (i+1, len(filenames)))
 
   f = ROOT.TFile(filenames[i])
@@ -94,7 +102,7 @@ for i in range(len(filenames)):
   neutralHad_pf_features = utils.padArray(neutralHad_pf_features, max_pf_neutralHad)
 
   type = 'train'
-  if i < 5:
+  if float(i+1)/len(filenames) < validation_frac:
     type = 'test'
 
   f = h5py.File("prep/features_"+type+"_"+str(i)+".hdf5", "w")
