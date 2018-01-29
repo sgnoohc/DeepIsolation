@@ -8,6 +8,7 @@ import numpy
 import sys
 from sklearn import metrics
 import h5py
+import glob
 
 import matplotlib
 matplotlib.use('Agg')
@@ -27,10 +28,10 @@ nTrain = int(sys.argv[2])
 
 f = h5py.File('prep/features_test_0.hdf5')
 
-global_features = f['global_features']
-charged_pf_features = f['charged_pf_features']
-photon_pf_features = f['photon_pf_features']
-neutralHad_pf_features = f['neutralHad_pf_features']
+global_features = f['global']
+charged_pf_features = f['charged_pf']
+photon_pf_features = f['photon_pf']
+neutralHad_pf_features = f['neutralHad_pf']
 label = f['label']
 relIso = f['relIso']
 
@@ -121,7 +122,7 @@ model.compile(optimizer = 'adam', loss = 'binary_crossentropy')
 nTrainAvailable = generator.nEvents_total(True)
 nTestAvailable = generator.nEvents_total(False)
 nTest = 500000
-nEpochs = 25
+nEpochs = 1
 nBatch = 10000
 
 print("Training on %d of %d available training events" % (nTrain, nTrainAvailable))
@@ -131,6 +132,17 @@ print("Training for %d epochs" % nEpochs)
 model.fit_generator(generator = generator.generate(True, nTrain), steps_per_epoch = generator.nSteps(True, nTrain), epochs = nEpochs)
 prediction = model.predict_generator(generator.generate(False, nTest), steps = generator.nSteps(False, nTest))
 
+relIso = numpy.empty(shape=0) 
+label = numpy.empty(shape=0)
+
+files = glob.glob("prep/features_test_*.hdf5")
+for file in files:
+  f = h5py.File(file, "r")
+  label = numpy.append(label, numpy.array(f['label']))
+  relIso = numpy.append(relIso, numpy.array(f['relIso']))
+
+label = label[:nTest]
+relIso = relIso[:nTest]
 relIso *= -1
 
 npzfile_bdt = numpy.load('bdt_roc.npz')
@@ -139,8 +151,12 @@ tpr_bdt = npzfile_bdt['tpr']
 
 fpr_re, tpr_re, thresh_re = metrics.roc_curve(label, relIso, pos_label = 1)
 fpr_nn, tpr_nn, thresh_nn = metrics.roc_curve(label, prediction, pos_label = 1)
+
+numpy.savez('ROCs/'+savename, tpr_nn=tpr_nn, fpr_nn=fpr_nn)
+
 plt.figure()
 plt.plot(fpr_re, tpr_re, color='darkred', lw=2, label='RelIso')
+plt.plot(fpr_bdt, tpr_bdt, color='aqua', lw=2, label='BDT trained w/sum. vars')
 plt.plot(fpr_nn, tpr_nn, color = 'darkorange', lw=2, label='DeepIsolation')
 plt.xscale('log')
 plt.xlim([0.001, 1.0])

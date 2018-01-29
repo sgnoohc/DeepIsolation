@@ -1,6 +1,7 @@
 import ROOT
 import numpy
 import root_numpy
+import random
 
 import matplotlib
 matplotlib.use('Agg')
@@ -11,30 +12,34 @@ import glob
 import h5py
 
 validation_frac = 0.03 # fraction of files to use as validation (will not be trained on)
-nFiles = 20
 
 # Read data from ROOT file
 #filenames = glob.glob("/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIsolation_Babies/merged_ntuple_*.root")
 filenames = glob.glob("/hadoop/cms/store/user/smay/DeepIsolation/*/merged_ntuple_*.root")
 filenames = numpy.array(filenames)
+random.shuffle(filenames)
 
 max_pf_charged = 0
 max_pf_photon = 0
 max_pf_neutralHad = 0
 
-
 # Find maximum number of pf cands (will pad arrays to that length)
 for i in range(len(filenames)):
-  if (i+1) >= nFiles:
-    break  
- 
   print(i)
   f = ROOT.TFile(filenames[i])
-  tree = f.Get("t")
+  try: 
+    tree = f.Get("t")
+  except:
+    print(filenames[i] + ' was unable to deliver a tree, skipping it.')
+    continue
 
   branches = ['pf_charged_pt', 'pf_photon_pt', 'pf_neutralHad_pt', 'lepton_flavor']
 
-  data = root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 1')
+  try:
+    data = root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 1')
+  except:
+    print(filenames[i] + ' was unable to deliver a tree, skipping it.')
+    continue
 
   charged_pf_timesteps = [len(X) for X in data['pf_charged_pt']]
   photon_pf_timesteps = [len(X) for X in data['pf_photon_pt']]
@@ -53,16 +58,22 @@ print(max_pf_neutralHad)
 
 # Loop through root babies and save hdf5 files
 for i in range(len(filenames)):
-  if (i+1) >= nFiles:
-    break
-
   print('Working on file %d/%d' % (i+1, len(filenames)))
 
   f = ROOT.TFile(filenames[i])
-  tree = f.Get("t")
+  try:
+    tree = f.Get("t")
+  except:
+    print(filenames[i] + ' was unable to deliver a tree, skipping it.')
+    continue
 
   branches = ['lepton_isFromW', 'lepton_pt', 'lepton_eta', 'lepton_phi', 'lepton_relIso03EA', 'lepton_chiso', 'lepton_nhiso', 'lepton_emiso', 'lepton_ncorriso', 'lepton_dxy', 'lepton_dz', 'lepton_ip3d', 'nvtx', 'lepton_flavor', 'lepton_nChargedPf', 'lepton_nPhotonPf', 'lepton_nNeutralHadPf', 'pf_charged_pt', 'pf_charged_dR', 'pf_charged_alpha', 'pf_charged_ptRel', 'pf_charged_puppiWeight', 'pf_charged_fromPV', 'pf_charged_pvAssociationQuality', 'pf_photon_pt', 'pf_photon_dR', 'pf_photon_alpha', 'pf_photon_ptRel', 'pf_photon_puppiWeight', 'pf_neutralHad_pt', 'pf_neutralHad_dR', 'pf_neutralHad_alpha', 'pf_neutralHad_ptRel', 'pf_neutralHad_puppiWeight']
-  data = root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 1')
+
+  try:
+    data = root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 1')
+  except:
+    print(filenames[i] + ' was unable to deliver a tree, skipping it.')
+    continue
 
   # Grab features
   global_features = numpy.array([data['lepton_pt'], data['lepton_eta'], data['lepton_phi'], data['lepton_relIso03EA'], data['lepton_chiso'], data['lepton_nhiso'], data['lepton_emiso'], data['lepton_ncorriso'], data['lepton_dxy'], data['lepton_dz'], data['lepton_ip3d'], data['nvtx'], data['lepton_flavor'], data['lepton_nChargedPf'], data['lepton_nPhotonPf'], data['lepton_nNeutralHadPf']])

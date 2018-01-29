@@ -20,6 +20,7 @@ def nEvents_total(train):
 
 def generate(train, nEvents):
   while 1:
+    print('Beginning of data')
     if train:
       files = glob.glob("prep/features_train_*.hdf5")
     else:
@@ -72,9 +73,9 @@ def nSteps(train, nEvents):
       break
     f = h5py.File(file, "r")
     nEventsInFile = len(f['label'])
-    if nEventsDelivered + nEventsInFile < nEvents:
+    if nEventsDelivered + nEventsInFile <= nEvents:
       nEventsDelivered += nEventsInFile
-      nSteps += nEvents//nBatch
+      nSteps += nEventsInFile//nBatch
       if nEventsInFile % nBatch != 0:
         nSteps += 1
     elif nEventsDelivered + nEventsInFile > nEvents:
