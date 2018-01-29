@@ -37,12 +37,34 @@
 
 #include "ScanChain.h"
 
+#include "fastjet/ClusterSequence.hh"
+using namespace fastjet;
+
 using namespace std;
 using namespace tas;
 
 const double coneSize = 0.5;
 const int nAnnuli = 8;
 const double coneSizeAnnuli = 1.0;
+
+//_________________________________________________________________________________________________
+// From a list of 4-vectors called "seeds", return a list of "jets" clustered based on "algo"
+vector<PseudoJet> cluster_jets(vector<LorentzVector> seeds, JetAlgorithm algo=kt_algorithm)
+{
+    vector<PseudoJet> particles;
+
+    for (LorentzVector& lv : seeds)
+        particles.push_back(PseudoJet(lv.px(), lv.py(), lv.pz(), lv.e()));
+
+    // choose a jet definition
+    JetDefinition jet_def(algo, 0.4);
+
+    // run the clustering, extract the jets
+    ClusterSequence cs(particles, jet_def);
+    vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
+
+    return jets;
+}
 
 
 // "Good" mu/el id functions taken from Philip's old babymaker
@@ -89,7 +111,7 @@ bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,float>& 
   return pair1.second > pair2.second;
 }
 
-const double pi = 3.1415926536;
+//const double pi = 3.1415926536; // Already defined in fastjet with higher precision
 double alpha(const LorentzVector p1, const LorentzVector p2) {
   double phi = p2.phi() - p1.phi();
   if (abs(phi) > pi)
