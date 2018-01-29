@@ -205,7 +205,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         lepton_ip3d = isMu ? cms3.mus_ip3d()[lepIdx] : cms3.els_ip3d()[lepIdx];
 
         // dij variables
-        vector<float> dijs = get_dijs(pLep);
+        dijs = get_dijs(pLep);
         sumdij = 0;
         maxdij = 0;
         mindij = 9999999;
@@ -437,6 +437,7 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lepton_dz"   , &lepton_dz    );
   BabyTree_->Branch("lepton_ip3d"   , &lepton_ip3d    );
 
+  BabyTree_->Branch("dijs"     , &dijs      );
   BabyTree_->Branch("sumdij"   , &sumdij    );
   BabyTree_->Branch("maxdij"   , &maxdij    );
   BabyTree_->Branch("mindij"   , &mindij    );

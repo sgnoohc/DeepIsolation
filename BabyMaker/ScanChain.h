@@ -60,6 +60,7 @@ class BabyMaker {
     Float_t maxdij               ;
     Float_t mindij               ;
     Int_t   ndij                 ;
+    std::vector<Float_t> dijs    ;
 
     Int_t   lepton_nChargedPf    ;
     Int_t   lepton_nPhotonPf     ;
