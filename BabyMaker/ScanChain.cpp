@@ -107,10 +107,12 @@ std::vector<unsigned int> goodElecIdx()
     return good_elec_idx;
 }
 
+//_________________________________________________________________________________________________
 bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,float>& pair2 ) {
   return pair1.second > pair2.second;
 }
 
+//_________________________________________________________________________________________________
 //const double pi = 3.1415926536; // Already defined in fastjet with higher precision
 double alpha(const LorentzVector p1, const LorentzVector p2) {
   double phi = p2.phi() - p1.phi();
@@ -120,6 +122,7 @@ double alpha(const LorentzVector p1, const LorentzVector p2) {
   return TMath::ATan2(eta, phi);
 }
 
+//_________________________________________________________________________________________________
 void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
   // Benchmark
@@ -172,7 +175,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
       nvtx = 0;
       for ( unsigned int ivtx = 0; ivtx < cms3.evt_nvtxs(); ivtx++ )
-	  if ( isGoodVertex( ivtx ) ) nvtx++;
+          if ( isGoodVertex( ivtx ) ) nvtx++;
       
       // Identify good leptons
       std::vector<unsigned int> good_muon_idx = goodMuonIdx();
@@ -207,9 +210,9 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         // Lepton truth
         lepton_isFromW = isFromW(abs(pdgid), lepIdx);
         lepton_isFromB = isFromB(abs(pdgid), lepIdx);
-	lepton_isFromC = isFromC(abs(pdgid), lepIdx);
-	lepton_isFromL = isFromLight(abs(pdgid), lepIdx);
-	lepton_isFromLF = isFromLightFake(abs(pdgid), lepIdx);
+        lepton_isFromC = isFromC(abs(pdgid), lepIdx);
+        lepton_isFromL = isFromLight(abs(pdgid), lepIdx);
+        lepton_isFromLF = isFromLightFake(abs(pdgid), lepIdx);
 
         // Lepton isolation vars
         lepton_relIso03EA = isMu ? muRelIso03EA(lepIdx, 1) : eleRelIso03EA(lepIdx, 2);
@@ -232,39 +235,39 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         lepton_nNeutralHadPf = 0;
 
         std::vector<Float_t> unordered_pf_charged_pt                     ;
-	std::vector<Float_t> unordered_pf_charged_dR                     ;
+        std::vector<Float_t> unordered_pf_charged_dR                     ;
         std::vector<Float_t> unordered_pf_charged_alpha                  ;
-	std::vector<Float_t> unordered_pf_charged_ptRel                  ;
-	std::vector<Float_t> unordered_pf_charged_puppiWeight            ;
-	std::vector<Int_t>   unordered_pf_charged_fromPV                 ;
-	std::vector<Int_t>   unordered_pf_charged_pvAssociationQuality   ;
+        std::vector<Float_t> unordered_pf_charged_ptRel                  ;
+        std::vector<Float_t> unordered_pf_charged_puppiWeight            ;
+        std::vector<Int_t>   unordered_pf_charged_fromPV                 ;
+        std::vector<Int_t>   unordered_pf_charged_pvAssociationQuality   ;
 
-	std::vector<Float_t> unordered_pf_photon_pt          ;
-	std::vector<Float_t> unordered_pf_photon_dR          ;
-	std::vector<Float_t> unordered_pf_photon_alpha       ;
-	std::vector<Float_t> unordered_pf_photon_ptRel       ;
-	std::vector<Float_t> unordered_pf_photon_puppiWeight ;
+        std::vector<Float_t> unordered_pf_photon_pt          ;
+        std::vector<Float_t> unordered_pf_photon_dR          ;
+        std::vector<Float_t> unordered_pf_photon_alpha       ;
+        std::vector<Float_t> unordered_pf_photon_ptRel       ;
+        std::vector<Float_t> unordered_pf_photon_puppiWeight ;
 
-	std::vector<Float_t> unordered_pf_neutralHad_pt          ;
-	std::vector<Float_t> unordered_pf_neutralHad_dR          ;
+        std::vector<Float_t> unordered_pf_neutralHad_pt          ;
+        std::vector<Float_t> unordered_pf_neutralHad_dR          ;
         std::vector<Float_t> unordered_pf_neutralHad_alpha       ;
-	std::vector<Float_t> unordered_pf_neutralHad_ptRel       ;
-	std::vector<Float_t> unordered_pf_neutralHad_puppiWeight ;
+        std::vector<Float_t> unordered_pf_neutralHad_ptRel       ;
+        std::vector<Float_t> unordered_pf_neutralHad_puppiWeight ;
 
-	std::vector<std::pair<int, float> > charged_pt_ordering;
-	std::vector<std::pair<int, float> > photon_pt_ordering;
-	std::vector<std::pair<int, float> > neutralHad_pt_ordering;
+        std::vector<std::pair<int, float> > charged_pt_ordering;
+        std::vector<std::pair<int, float> > photon_pt_ordering;
+        std::vector<std::pair<int, float> > neutralHad_pt_ordering;
 
-	pf_annuli_energy.reserve(nAnnuli);	
+        pf_annuli_energy.reserve(nAnnuli);      
         for (int i = 0; i < nAnnuli; i++)
           pf_annuli_energy[i] = 0;
 
         TH1D* hR = new TH1D("hR", "", nAnnuli, 0.0, coneSizeAnnuli);
 
-	// Begin pf cand loop
-	for ( unsigned int pIdx = 0; pIdx < cms3.pfcands_p4().size(); pIdx++ ) {
-	  LorentzVector pCand = cms3.pfcands_p4()[pIdx];
- 	  double dR = DeltaR(pLep, pCand);
+        // Begin pf cand loop
+        for ( unsigned int pIdx = 0; pIdx < cms3.pfcands_p4().size(); pIdx++ ) {
+          LorentzVector pCand = cms3.pfcands_p4()[pIdx];
+          double dR = DeltaR(pLep, pCand);
           if (dR < coneSizeAnnuli) {
             int idx = (hR->FindBin(dR))-1;
             pf_annuli_energy[idx] += pCand.pt();
@@ -275,8 +278,8 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           int pf_pdg_id = cms3.pfcands_particleId()[pIdx];
           int pf_charge = cms3.pfcands_charge()[pIdx];
     
-	  // Check if pf cand is lepton itself
-	  if (abs(pf_pdg_id) == (isMu ? 13 : 11 ) && dR < 0.05) continue;
+          // Check if pf cand is lepton itself
+          if (abs(pf_pdg_id) == (isMu ? 13 : 11 ) && dR < 0.05) continue;
 
           // Identify charged/photon/neutral hadron
           int candIdx = -1; // 0 = charged, 1 = photon, 2 = neutral hadron
@@ -284,58 +287,58 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           else if (abs(pf_pdg_id) == 22) candIdx = 1;
           else candIdx = 2;
 
-	  bool orderByPt = true; // true = order by pT, false = order by pTRel
+          bool orderByPt = true; // true = order by pT, false = order by pTRel
 
           if (candIdx == 0) { // charged
-	    if (orderByPt)
-	      charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, pCand.pt()));
-	    else
+            if (orderByPt)
+              charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, pCand.pt()));
+            else
               charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, ptRel(pCand, pLep, false)));
-	    lepton_nChargedPf++;
+            lepton_nChargedPf++;
 
-	    unordered_pf_charged_pt.push_back(pCand.pt()/pLep.pt());
-	    unordered_pf_charged_dR.push_back(DeltaR(pLep, pCand));
+            unordered_pf_charged_pt.push_back(pCand.pt()/pLep.pt());
+            unordered_pf_charged_dR.push_back(DeltaR(pLep, pCand));
             unordered_pf_charged_alpha.push_back(alpha(pLep, pCand));
-	    unordered_pf_charged_ptRel.push_back(ptRel(pCand, pLep, false));
-	    unordered_pf_charged_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+            unordered_pf_charged_ptRel.push_back(ptRel(pCand, pLep, false));
+            unordered_pf_charged_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
 
-	    unordered_pf_charged_fromPV.push_back(cms3.pfcands_fromPV()[pIdx]);
-	    unordered_pf_charged_pvAssociationQuality.push_back(cms3.pfcands_pvAssociationQuality()[pIdx]);
-	  }
+            unordered_pf_charged_fromPV.push_back(cms3.pfcands_fromPV()[pIdx]);
+            unordered_pf_charged_pvAssociationQuality.push_back(cms3.pfcands_pvAssociationQuality()[pIdx]);
+          }
 
-	  else if (candIdx == 1) { // photons
-	    if (orderByPt)
+          else if (candIdx == 1) { // photons
+            if (orderByPt)
               photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pCand.pt()));
             else
               photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, ptRel(pCand, pLep, false)));
-	    lepton_nPhotonPf++;
+            lepton_nPhotonPf++;
 
-	    unordered_pf_photon_pt.push_back(pCand.pt()/pLep.pt());
-	    unordered_pf_photon_dR.push_back(DeltaR(pLep, pCand));
-	    unordered_pf_photon_alpha.push_back(alpha(pLep, pCand));
-	    unordered_pf_photon_ptRel.push_back(ptRel(pCand, pLep, false));
-	    unordered_pf_photon_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
-	  }
+            unordered_pf_photon_pt.push_back(pCand.pt()/pLep.pt());
+            unordered_pf_photon_dR.push_back(DeltaR(pLep, pCand));
+            unordered_pf_photon_alpha.push_back(alpha(pLep, pCand));
+            unordered_pf_photon_ptRel.push_back(ptRel(pCand, pLep, false));
+            unordered_pf_photon_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+          }
 
-	  else if (candIdx == 2) { // neutral hadrons
-	    if (orderByPt)
+          else if (candIdx == 2) { // neutral hadrons
+            if (orderByPt)
               neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pCand.pt()));
             else
               neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, ptRel(pCand, pLep, false)));
-	    lepton_nNeutralHadPf++;
+            lepton_nNeutralHadPf++;
 
-	    unordered_pf_neutralHad_pt.push_back(pCand.pt()/pLep.pt());
-	    unordered_pf_neutralHad_dR.push_back(DeltaR(pLep, pCand));
-	    unordered_pf_neutralHad_alpha.push_back(alpha(pLep, pCand));
-	    unordered_pf_neutralHad_ptRel.push_back(ptRel(pCand, pLep, false));
-	    unordered_pf_neutralHad_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
-	  }
+            unordered_pf_neutralHad_pt.push_back(pCand.pt()/pLep.pt());
+            unordered_pf_neutralHad_dR.push_back(DeltaR(pLep, pCand));
+            unordered_pf_neutralHad_alpha.push_back(alpha(pLep, pCand));
+            unordered_pf_neutralHad_ptRel.push_back(ptRel(pCand, pLep, false));
+            unordered_pf_neutralHad_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
+          }
 
         } // end pf cand loop 
-	delete hR;
+        delete hR;
 
-	// Sort charged pf cands
-	std::sort(charged_pt_ordering.begin(), charged_pt_ordering.end(), sortByValue);
+        // Sort charged pf cands
+        std::sort(charged_pt_ordering.begin(), charged_pt_ordering.end(), sortByValue);
         for (std::vector<std::pair<int, float> >::iterator it = charged_pt_ordering.begin(); it != charged_pt_ordering.end(); ++it) {
           pf_charged_pt.push_back(unordered_pf_charged_pt.at(it->first));
           pf_charged_dR.push_back(unordered_pf_charged_dR.at(it->first));
@@ -347,48 +350,48 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           pf_charged_pvAssociationQuality.push_back(unordered_pf_charged_pvAssociationQuality.at(it->first));
         }
        
-	// Sort photon cands
-	std::sort(photon_pt_ordering.begin(), photon_pt_ordering.end(), sortByValue);
+        // Sort photon cands
+        std::sort(photon_pt_ordering.begin(), photon_pt_ordering.end(), sortByValue);
         for (std::vector<std::pair<int, float> >::iterator it = photon_pt_ordering.begin(); it != photon_pt_ordering.end(); ++it) {
           pf_photon_pt.push_back(unordered_pf_photon_pt.at(it->first));
           pf_photon_dR.push_back(unordered_pf_photon_dR.at(it->first));
-	  pf_photon_alpha.push_back(unordered_pf_photon_alpha.at(it->first));
+          pf_photon_alpha.push_back(unordered_pf_photon_alpha.at(it->first));
           pf_photon_ptRel.push_back(unordered_pf_photon_ptRel.at(it->first));
           pf_photon_puppiWeight.push_back(unordered_pf_photon_puppiWeight.at(it->first));
         }
 
-	// Sort neutral hads
-	std::sort(neutralHad_pt_ordering.begin(), neutralHad_pt_ordering.end(), sortByValue);
+        // Sort neutral hads
+        std::sort(neutralHad_pt_ordering.begin(), neutralHad_pt_ordering.end(), sortByValue);
         for (std::vector<std::pair<int, float> >::iterator it = neutralHad_pt_ordering.begin(); it != neutralHad_pt_ordering.end(); ++it) {
-	  pf_neutralHad_pt.push_back(unordered_pf_neutralHad_pt.at(it->first));
+          pf_neutralHad_pt.push_back(unordered_pf_neutralHad_pt.at(it->first));
           pf_neutralHad_dR.push_back(unordered_pf_neutralHad_dR.at(it->first));
-	  pf_neutralHad_alpha.push_back(unordered_pf_neutralHad_alpha.at(it->first));
-	  pf_neutralHad_ptRel.push_back(unordered_pf_neutralHad_ptRel.at(it->first));
-	  pf_neutralHad_puppiWeight.push_back(unordered_pf_neutralHad_puppiWeight.at(it->first));
-	}
+          pf_neutralHad_alpha.push_back(unordered_pf_neutralHad_alpha.at(it->first));
+          pf_neutralHad_ptRel.push_back(unordered_pf_neutralHad_ptRel.at(it->first));
+          pf_neutralHad_puppiWeight.push_back(unordered_pf_neutralHad_puppiWeight.at(it->first));
+        }
 
         FillBabyNtuple();
         nLeptons++;
 
         pf_charged_pt.clear();
-	pf_charged_dR.clear();
-	pf_charged_alpha.clear();
-	pf_charged_ptRel.clear();
-	pf_charged_puppiWeight.clear();
-	pf_charged_fromPV.clear();
-	pf_charged_pvAssociationQuality.clear();
+        pf_charged_dR.clear();
+        pf_charged_alpha.clear();
+        pf_charged_ptRel.clear();
+        pf_charged_puppiWeight.clear();
+        pf_charged_fromPV.clear();
+        pf_charged_pvAssociationQuality.clear();
 
-	pf_photon_pt.clear();
-	pf_photon_dR.clear();
-	pf_photon_alpha.clear();
-	pf_photon_ptRel.clear();
-	pf_photon_puppiWeight.clear();
+        pf_photon_pt.clear();
+        pf_photon_dR.clear();
+        pf_photon_alpha.clear();
+        pf_photon_ptRel.clear();
+        pf_photon_puppiWeight.clear();
 
-	pf_neutralHad_pt.clear();
-	pf_neutralHad_dR.clear();
- 	pf_neutralHad_alpha.clear();
-	pf_neutralHad_ptRel.clear();
-	pf_neutralHad_puppiWeight.clear();
+        pf_neutralHad_pt.clear();
+        pf_neutralHad_dR.clear();
+        pf_neutralHad_alpha.clear();
+        pf_neutralHad_ptRel.clear();
+        pf_neutralHad_puppiWeight.clear();
 
       } // end lepton loop
 
@@ -406,8 +409,8 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
   cout << endl;
   cout << nEventsTotal << " Events Processed" << endl;
   cout << "------------------------------" << endl;
-  cout << "CPU  Time:	" << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
-  cout << "Real Time:	" << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
+  cout << "CPU  Time:   " << Form( "%.01f s", bmark->GetCpuTime("benchmark")  ) << endl;
+  cout << "Real Time:   " << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
   cout << endl;
 
   return;
