@@ -36,9 +36,7 @@
 #include "../CORE/Tools/btagsf/BTagCalibrationStandalone.cc"
 
 #include "ScanChain.h"
-
-#include "fastjet/ClusterSequence.hh"
-using namespace fastjet;
+#include "JetSubstructureVariables.h"
 
 using namespace std;
 using namespace tas;
@@ -46,26 +44,6 @@ using namespace tas;
 const double coneSize = 0.5;
 const int nAnnuli = 8;
 const double coneSizeAnnuli = 1.0;
-
-//_________________________________________________________________________________________________
-// From a list of 4-vectors called "seeds", return a list of "jets" clustered based on "algo"
-vector<PseudoJet> cluster_jets(vector<LorentzVector> seeds, JetAlgorithm algo=kt_algorithm)
-{
-    vector<PseudoJet> particles;
-
-    for (LorentzVector& lv : seeds)
-        particles.push_back(PseudoJet(lv.px(), lv.py(), lv.pz(), lv.e()));
-
-    // choose a jet definition
-    JetDefinition jet_def(algo, 0.4);
-
-    // run the clustering, extract the jets
-    ClusterSequence cs(particles, jet_def);
-    vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
-
-    return jets;
-}
-
 
 // "Good" mu/el id functions taken from Philip's old babymaker
 //_________________________________________________________________________________________________
@@ -225,6 +203,19 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         lepton_dxy  = isMu ? cms3.mus_dxyPV()[lepIdx] : cms3.els_dxyPV()[lepIdx];
         lepton_dz   = isMu ? cms3.mus_dzPV()[lepIdx] : cms3.els_dzPV()[lepIdx];
         lepton_ip3d = isMu ? cms3.mus_ip3d()[lepIdx] : cms3.els_ip3d()[lepIdx];
+
+        // dij variables
+        vector<float> dijs = get_dijs(pLep);
+        sumdij = 0;
+        maxdij = 0;
+        mindij = 9999999;
+        ndij = dijs.size();
+        for (auto& dij : dijs)
+        {
+          if (dij > maxdij) maxdij = dij;
+          if (dij < mindij) mindij = dij;
+          sumdij += dij;
+        }
 
         ////////////////////////////////
         // Loop through pf candidates //
@@ -445,6 +436,11 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lepton_dxy"   , &lepton_dxy    );
   BabyTree_->Branch("lepton_dz"   , &lepton_dz    );
   BabyTree_->Branch("lepton_ip3d"   , &lepton_ip3d    );
+
+  BabyTree_->Branch("sumdij"   , &sumdij    );
+  BabyTree_->Branch("maxdij"   , &maxdij    );
+  BabyTree_->Branch("mindij"   , &mindij    );
+  BabyTree_->Branch("ndij"     , &ndij      );
 
   BabyTree_->Branch("lepton_nChargedPf", &lepton_nChargedPf);
   BabyTree_->Branch("lepton_nPhotonPf", &lepton_nPhotonPf);

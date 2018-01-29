@@ -43,7 +43,7 @@ class BabyMaker {
     Int_t   lepton_isFromL    ;
     Int_t   lepton_isFromLF   ;
 
-    Int_t   nvtx	         ;
+    Int_t   nvtx                 ;
     Float_t lepton_eta           ;
     Float_t lepton_phi           ;
     Float_t lepton_pt            ;
@@ -56,16 +56,21 @@ class BabyMaker {
     Float_t lepton_dz            ;
     Float_t lepton_ip3d          ;
 
+    Float_t sumdij               ;
+    Float_t maxdij               ;
+    Float_t mindij               ;
+    Int_t   ndij                 ;
+
     Int_t   lepton_nChargedPf    ;
     Int_t   lepton_nPhotonPf     ;
     Int_t   lepton_nNeutralHadPf ;
 
-    std::vector<Float_t> pf_charged_pt			   ;
-    std::vector<Float_t> pf_charged_dR			   ;
+    std::vector<Float_t> pf_charged_pt                     ;
+    std::vector<Float_t> pf_charged_dR                     ;
     std::vector<Float_t> pf_charged_alpha                  ;
-    std::vector<Float_t> pf_charged_ptRel		   ;
-    std::vector<Float_t> pf_charged_puppiWeight 	   ;
-    std::vector<Int_t>   pf_charged_fromPV		   ;
+    std::vector<Float_t> pf_charged_ptRel                  ;
+    std::vector<Float_t> pf_charged_puppiWeight            ;
+    std::vector<Int_t>   pf_charged_fromPV                 ;
     std::vector<Int_t>   pf_charged_pvAssociationQuality   ;
 
     std::vector<Float_t> pf_photon_pt          ;
