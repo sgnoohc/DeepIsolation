@@ -56,6 +56,7 @@ class BabyMaker {
     Float_t lepton_dz            ;
     Float_t lepton_ip3d          ;
 
+    Float_t              substr_ptrel   ;
     Float_t              substr_jetpt   ;
     Float_t              substr_subjet_pt;
     Float_t              substr_subjet_eta;
@@ -77,6 +78,13 @@ class BabyMaker {
     std::vector<Float_t> substr_pf_dr   ;
     std::vector<Int_t>   substr_pf_type ;
     std::vector<Int_t>   substr_pf_id ;
+    Int_t                substr_nreclsj;
+    std::vector<Float_t> substr_reclsj_dr;
+    std::vector<Float_t> substr_reclsj_pt;
+    std::vector<Float_t> substr_reclsj_eta;
+    std::vector<Float_t> substr_reclsj_phi;
+    std::vector<Float_t> substr_reclsj_e;
+    std::vector<Float_t> substr_reclsj_m;
 
     Int_t   lepton_nChargedPf    ;
     Int_t   lepton_nPhotonPf     ;

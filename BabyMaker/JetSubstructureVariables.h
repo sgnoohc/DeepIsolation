@@ -9,6 +9,14 @@ using namespace std;
 using namespace fastjet;
 
 //##############################################################################
+LorentzVector makeLV(PseudoJet jet)
+{
+    LorentzVector lv;
+    lv.SetPxPyPzE(jet.px(), jet.py(), jet.pz(), jet.e());
+    return lv;
+}
+
+//##############################################################################
 int matchedJetIdx(LorentzVector lep_p4)
 {
     int index = -1;
@@ -38,6 +46,14 @@ int get_pf_type(int pIdx)
     else if (abs(pf_pdg_id) == 22) candIdx = 1;
     else candIdx = 2;
     return candIdx;
+}
+
+//#############################################################################
+bool isFromPVDeepIso(int pIdx)
+{
+    bool passfrompv  = cms3.pfcands_fromPV()[pIdx] >= 2;
+    bool passquality = cms3.pfcands_pvAssociationQuality()[pIdx] >= 1;
+    return passfrompv && passquality;
 }
 
 //#############################################################################
@@ -202,6 +218,39 @@ std::tuple<vector<float>, vector<float>, vector<float>, vector<float>, vector<in
         }
     }
     return make_tuple(pf_pt, pf_eta, pf_phi, pf_dr, pf_type, pf_id);
+}
+
+//##############################################################################
+vector<LorentzVector> get_subjets(LorentzVector lep_p4, JetAlgorithm algo=kt_algorithm, float conesize=1.5)
+{
+
+    vector<LorentzVector> seeds;
+    for (unsigned int ipf = 0; ipf < cms3.pfcands_charge().size(); ++ipf)
+    {
+        bool is_in_cone = ROOT::Math::VectorUtil::DeltaR(cms3.pfcands_p4()[ipf], lep_p4) < conesize;
+        bool pass_chs   = get_pf_type(ipf) <= 0 ? isFromPVDeepIso(ipf) : true;
+        bool is_not_lep = get_pf_type(ipf) >= 0;
+        if (is_in_cone && pass_chs && is_not_lep)
+            seeds.push_back(cms3.pfcands_p4()[ipf]);
+    }
+
+    vector<PseudoJet> particles;
+
+    for (LorentzVector& lv : seeds)
+        particles.push_back(PseudoJet(lv.px(), lv.py(), lv.pz(), lv.e()));
+
+    // choose a jet definition
+    JetDefinition jet_def(algo, 0.4);
+
+    // run the clustering, extract the jets
+    ClusterSequence cs(particles, jet_def);
+    vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
+
+    vector<LorentzVector> rtn;
+    for (auto& jet : jets)
+        rtn.push_back(makeLV(jet));
+
+    return rtn;
 }
 
 #endif

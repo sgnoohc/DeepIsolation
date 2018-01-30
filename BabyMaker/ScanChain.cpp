@@ -206,6 +206,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
         // substructure variables
         int ijet = matchedJetIdx(pLep);
+        substr_ptrel = getPtRel(pdgid, lepIdx, true, 2);
         substr_jetpt = ijet < 0 ? pLep.pt() : cms3.pfjets_p4()[ijet].pt();
         std::tie(substr_subjet_pt, substr_subjet_eta, substr_subjet_phi, substr_subjet_e, substr_nsubjets, substr_dijs, substr_dRs, substr_minkts) = get_dij_components(pLep);
         TLorentzVector tlv_subjet;
@@ -225,6 +226,24 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           substr_sumdij += dij;
         }
         std::tie(substr_pf_pt, substr_pf_eta, substr_pf_phi, substr_pf_dr, substr_pf_type, substr_pf_id) = get_pf_cands(pLep);
+        vector<LorentzVector> reclsjs = get_subjets(pLep, antikt_algorithm, 0.6);
+        substr_nreclsj = 0;
+        substr_reclsj_dr.clear();
+        substr_reclsj_pt.clear();
+        substr_reclsj_eta.clear();
+        substr_reclsj_phi.clear();
+        substr_reclsj_e.clear();
+        substr_reclsj_m.clear();
+        substr_nreclsj = reclsjs.size();
+        for (auto& jet : reclsjs)
+        {
+            substr_reclsj_pt.push_back(jet.pt());
+            substr_reclsj_eta.push_back(jet.eta());
+            substr_reclsj_phi.push_back(jet.phi());
+            substr_reclsj_e.push_back(jet.e());
+            substr_reclsj_m.push_back(jet.mass());
+            substr_reclsj_dr.push_back(ROOT::Math::VectorUtil::DeltaR(pLep, jet));
+        }
 
         ////////////////////////////////
         // Loop through pf candidates //
@@ -446,6 +465,7 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lepton_dz"   , &lepton_dz    );
   BabyTree_->Branch("lepton_ip3d"   , &lepton_ip3d    );
 
+  BabyTree_->Branch("substr_ptrel"    , &substr_ptrel     );
   BabyTree_->Branch("substr_jetpt"    , &substr_jetpt     );
   BabyTree_->Branch("substr_dijs"     , &substr_dijs      );
   BabyTree_->Branch("substr_dRs"      , &substr_dRs       );
@@ -466,6 +486,13 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("substr_subjet_phi" , &substr_subjet_phi );
   BabyTree_->Branch("substr_subjet_dr"  , &substr_subjet_dr  );
   BabyTree_->Branch("substr_nsubjets"   , &substr_nsubjets   );
+  BabyTree_->Branch("substr_nreclsj"  , &substr_nreclsj  );
+  BabyTree_->Branch("substr_reclsj_dr"  , &substr_reclsj_dr  );
+  BabyTree_->Branch("substr_reclsj_pt"  , &substr_reclsj_pt  );
+  BabyTree_->Branch("substr_reclsj_eta"  , &substr_reclsj_eta  );
+  BabyTree_->Branch("substr_reclsj_phi"  , &substr_reclsj_phi  );
+  BabyTree_->Branch("substr_reclsj_e"  , &substr_reclsj_e  );
+  BabyTree_->Branch("substr_reclsj_m"  , &substr_reclsj_m  );
 
   BabyTree_->Branch("lepton_nChargedPf", &lepton_nChargedPf);
   BabyTree_->Branch("lepton_nPhotonPf", &lepton_nPhotonPf);
