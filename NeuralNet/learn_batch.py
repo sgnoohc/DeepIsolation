@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import utils
 import generator
 
+### Parse args ###
 if len(sys.argv) != 3:
   print('Incorrect number of arguments')
   print('Arg 1: save name')
@@ -25,6 +26,11 @@ if len(sys.argv) != 3:
 
 savename = str(sys.argv[1])
 nTrain = int(sys.argv[2])
+
+
+### Features ###
+use_global = False
+use_ptRel = False
 
 f = h5py.File('prep/features_test_0.hdf5')
 
@@ -35,10 +41,19 @@ neutralHad_pf_features = f['neutralHad_pf']
 label = f['label']
 relIso = f['relIso']
 
-n_global_features = len(global_features[0])
-n_charged_pf_features = len(charged_pf_features[0][0])
-n_photon_pf_features = len(photon_pf_features[0][0])
-n_neutralHad_pf_features = len(neutralHad_pf_features[0][0])
+if use_global:
+  n_global_features = len(global_features[0])
+else:
+  n_global_features = 1
+
+if use_ptRel:
+  n_charged_pf_features = len(charged_pf_features[0][0])
+  n_photon_pf_features = len(photon_pf_features[0][0])
+  n_neutralHad_pf_features = len(neutralHad_pf_features[0][0])
+else:
+  n_charged_pf_features = len(charged_pf_features[0][0])-1
+  n_photon_pf_features = len(photon_pf_features[0][0])-1
+  n_neutralHad_pf_features = len(neutralHad_pf_features[0][0])-1
 
 print(n_global_features)
 print(n_charged_pf_features)
@@ -121,16 +136,16 @@ model.compile(optimizer = 'adam', loss = 'binary_crossentropy')
 # Train & Test
 nTrainAvailable = generator.nEvents_total(True)
 nTestAvailable = generator.nEvents_total(False)
-nTest = 500000
-nEpochs = 1
+nTest = 1000000
+nEpochs = 25
 nBatch = 10000
 
 print("Training on %d of %d available training events" % (nTrain, nTrainAvailable))
 print("Testing on %d of %d available testing events" % (nTest, nTestAvailable))
 print("Training for %d epochs" % nEpochs)
 
-model.fit_generator(generator = generator.generate(True, nTrain), steps_per_epoch = generator.nSteps(True, nTrain), epochs = nEpochs)
-prediction = model.predict_generator(generator.generate(False, nTest), steps = generator.nSteps(False, nTest))
+model.fit_generator(generator = generator.generate(True, nTrain, use_global=use_global, use_ptRel=use_ptRel), steps_per_epoch = generator.nSteps(True, nTrain), epochs = nEpochs)
+prediction = model.predict_generator(generator.generate(False, nTest, use_global=use_global, use_ptRel=use_ptRel), steps = generator.nSteps(False, nTest))
 
 relIso = numpy.empty(shape=0) 
 label = numpy.empty(shape=0)
