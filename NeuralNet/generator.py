@@ -18,7 +18,7 @@ def nEvents_total(train):
     f.close()
   return nEvents 
 
-def generate(train, nEvents):
+def generate(train, nEvents, use_global = True, use_ptRel = True): # opts should be a numpy array of strings
   while 1:
     print('Beginning of data')
     if train:
@@ -37,6 +37,17 @@ def generate(train, nEvents):
       photon_pf_features = f['photon_pf']
       neutralHad_pf_features = f['neutralHad_pf']
       label = f['label']
+
+      if not use_global:
+        global_features = f['relIso']
+      if not use_ptRel:
+        charged_indices = numpy.array([0,1,2,4,5,6])
+        photon_indices = numpy.array([0,1,2,4])
+        neutralHad_indices = numpy.array([0,1,2,4])
+     
+        charged_pf_features = charged_pf_features[:,:,charged_indices]
+        photon_pf_features = photon_pf_features[:,:,photon_indices]
+        neutralHad_pf_features = neutralHad_pf_features[:,:,neutralHad_indices]
 
       counter = -nBatch
       while counter+nBatch < len(label):
