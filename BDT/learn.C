@@ -1,0 +1,105 @@
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <string>
+
+#include "TChain.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TString.h"
+#include "TObjString.h"
+#include "TSystem.h"
+#include "TROOT.h"
+#include "TMVA/Factory.h"
+#include "TMVA/Tools.h"
+
+void learn(int nTrain)
+{
+  // Initialize TMVA
+  TMVA::Tools::Instance();
+
+  TFile* outputFile = TFile::Open("BDT.root", "RECREATE");
+
+  TMVA::Factory *factory = new TMVA::Factory("TMVA", outputFile, "V:DrawProgressBar=True:Transformations=I;D;P;G:AnalysisType=Classification");
+
+  TString rootFile = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.0/merged_ntuple_*.root";
+ 
+
+  TChain* chain = new TChain("t");
+  chain->Add(rootFile);
+
+  TObjArray *listOfFiles = chain->GetListOfFiles();
+  TIter fileIter(listOfFiles);
+  TFile *currentFile = 0;
+
+  cout << "The files are: " << endl;
+  while ((currentFile = (TFile*)fileIter.Next())) {
+    cout << "here" << endl;
+    TFile file(currentFile->GetTitle());
+    TTree *tree = (TTree*)file.Get("t");
+
+    factory->AddSignalTree(tree);
+    factory->AddBackgroundTree(tree);
+
+    delete tree;
+    file.Close();  
+  }
+
+  Double_t signalWeight     = 1.0;
+  Double_t backgroundWeight = 1.0;
+
+  factory->AddVariable("lepton_eta", 'F');
+  factory->AddVariable("lepton_phi", 'F');
+  factory->AddVariable("lepton_pt", 'F');
+  factory->AddVariable("lepton_relIso03EA", 'F');
+  factory->AddVariable("lepton_chiso", 'F');
+  factory->AddVariable("lepton_nhiso", 'F');
+  factory->AddVariable("lepton_emiso", 'F');
+  factory->AddVariable("lepton_ncorriso", 'F');
+  factory->AddVariable("lepton_dxy", 'F');
+  factory->AddVariable("lepton_dz", 'F');
+  factory->AddVariable("lepton_ip3d", 'F');
+
+  factory->AddVariable("lepton_nChargedPf", 'I');
+  factory->AddVariable("lepton_nPhotonPf", 'I');
+  factory->AddVariable("lepton_nNeutralHadPf", 'I');
+  factory->AddVariable("nvtx", 'I');
+
+  factory->AddVariable("pf_annuli_energy[0]", 'F');
+  factory->AddVariable("pf_annuli_energy[1]", 'F');
+  factory->AddVariable("pf_annuli_energy[2]", 'F');
+  factory->AddVariable("pf_annuli_energy[3]", 'F');
+  factory->AddVariable("pf_annuli_energy[4]", 'F');
+  factory->AddVariable("pf_annuli_energy[5]", 'F');
+  factory->AddVariable("pf_annuli_energy[6]", 'F');
+  factory->AddVariable("pf_annuli_energy[7]", 'F');
+
+  cout << "nTrain is " << nTrain << endl;
+
+  float nTrainF = nTrain;
+  float nTrainSigF = nTrainF*0.875;
+  float nTrainBkgF = nTrainF*0.125;
+
+  int nTrainSig = (int) nTrainSigF;
+  int nTrainBkg = (int) nTrainBkgF;
+
+  cout << nTrainSig << " " << nTrainBkg << endl;
+
+  TString prepare_events = "nTrain_Signal=" + to_string(nTrainSig) + ":nTrain_Background=" + to_string(nTrainBkg) + ":nTest_Signal=" + to_string(nTrainSig) + ":nTest_Background=" + to_string(nTrainBkg) + ":SplitMode=Alternate:NormMode=NumEvents:!V";   
+
+  factory->PrepareTrainingAndTestTree("lepton_isFromW==1&&lepton_flavor==1", "lepton_isFromW==0&&lepton_flavor==1", prepare_events);
+  factory->SetSignalWeightExpression("1");
+  factory->SetBackgroundWeightExpression("1");
+
+  TString option = "!H:V:NTrees=1000:BoostType=Grad:Shrinkage=0.10:!UseBaggedGrad:nCuts=2000:MinNodeSize=0.1%:PruneStrength=5:PruneMethod=CostComplexity:MaxDepth=3:CreateMVAPdfs";
+
+  factory->BookMethod(TMVA::Types::kBDT, "BDT", option);
+  factory->TrainAllMethods();
+  factory->TestAllMethods();
+  factory->EvaluateAllMethods();
+
+  outputFile->Close();
+  std::cout << "==> Wrote root file: " << outputFile->GetName() << std::endl;
+  std::cout << "==> TMVAClassification is done!" << std::endl;
+  delete factory;
+}
