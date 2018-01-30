@@ -8,6 +8,6 @@ TARGET = processBaby
 
 all: $(TARGET)
 
-processBaby: ScanChain.h ScanChain.cpp processBaby.cpp
+processBaby: ScanChain.h ScanChain.cpp processBaby.cpp JetSubstructureVariables.h
 	$(CC) $(CFLAGS) -I${ROOTSYS}/include -o processBaby processBaby.cpp $(ROOTLIBS) $(FASTJETCFG)
 

@@ -204,18 +204,27 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         lepton_dz   = isMu ? cms3.mus_dzPV()[lepIdx] : cms3.els_dzPV()[lepIdx];
         lepton_ip3d = isMu ? cms3.mus_ip3d()[lepIdx] : cms3.els_ip3d()[lepIdx];
 
-        // dij variables
-        dijs = get_dijs(pLep);
-        sumdij = 0;
-        maxdij = 0;
-        mindij = 9999999;
-        ndij = dijs.size();
-        for (auto& dij : dijs)
+        // substructure variables
+        int ijet = matchedJetIdx(pLep);
+        substr_jetpt = ijet < 0 ? pLep.pt() : cms3.pfjets_p4()[ijet].pt();
+        std::tie(substr_subjet_pt, substr_subjet_eta, substr_subjet_phi, substr_subjet_e, substr_nsubjets, substr_dijs, substr_dRs, substr_minkts) = get_dij_components(pLep);
+        TLorentzVector tlv_subjet;
+        tlv_subjet.SetPtEtaPhiE(substr_subjet_pt, substr_subjet_eta, substr_subjet_phi, substr_subjet_e);
+        LorentzVector lv_subjet;
+        lv_subjet.SetPxPyPzE(tlv_subjet.Px(), tlv_subjet.Py(), tlv_subjet.Pz(), tlv_subjet.E());
+        substr_subjet_dr = ROOT::Math::VectorUtil::DeltaR(lv_subjet, pLep);
+        substr_sumdij = 0;
+        substr_maxdij = 0;
+        substr_mindij = 9999999;
+        substr_ndij = substr_dijs.size();
+        substr_njet = get_nmatched_jets(pLep);
+        for (auto& dij : substr_dijs)
         {
-          if (dij > maxdij) maxdij = dij;
-          if (dij < mindij) mindij = dij;
-          sumdij += dij;
+          if (dij > substr_maxdij) substr_maxdij = dij;
+          if (dij < substr_mindij) substr_mindij = dij;
+          substr_sumdij += dij;
         }
+        std::tie(substr_pf_pt, substr_pf_eta, substr_pf_phi, substr_pf_dr, substr_pf_type, substr_pf_id) = get_pf_cands(pLep);
 
         ////////////////////////////////
         // Loop through pf candidates //
@@ -437,11 +446,26 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lepton_dz"   , &lepton_dz    );
   BabyTree_->Branch("lepton_ip3d"   , &lepton_ip3d    );
 
-  BabyTree_->Branch("dijs"     , &dijs      );
-  BabyTree_->Branch("sumdij"   , &sumdij    );
-  BabyTree_->Branch("maxdij"   , &maxdij    );
-  BabyTree_->Branch("mindij"   , &mindij    );
-  BabyTree_->Branch("ndij"     , &ndij      );
+  BabyTree_->Branch("substr_jetpt"    , &substr_jetpt     );
+  BabyTree_->Branch("substr_dijs"     , &substr_dijs      );
+  BabyTree_->Branch("substr_dRs"      , &substr_dRs       );
+  BabyTree_->Branch("substr_minkts"   , &substr_minkts    );
+  BabyTree_->Branch("substr_sumdij"   , &substr_sumdij    );
+  BabyTree_->Branch("substr_maxdij"   , &substr_maxdij    );
+  BabyTree_->Branch("substr_mindij"   , &substr_mindij    );
+  BabyTree_->Branch("substr_ndij"     , &substr_ndij      );
+  BabyTree_->Branch("substr_njet"     , &substr_njet      );
+  BabyTree_->Branch("substr_pf_pt"    , &substr_pf_pt     );
+  BabyTree_->Branch("substr_pf_eta"   , &substr_pf_eta    );
+  BabyTree_->Branch("substr_pf_phi"   , &substr_pf_phi    );
+  BabyTree_->Branch("substr_pf_dr"    , &substr_pf_dr     );
+  BabyTree_->Branch("substr_pf_type"  , &substr_pf_type   );
+  BabyTree_->Branch("substr_pf_id"      , &substr_pf_id   );
+  BabyTree_->Branch("substr_subjet_pt"  , &substr_subjet_pt  );
+  BabyTree_->Branch("substr_subjet_eta" , &substr_subjet_eta );
+  BabyTree_->Branch("substr_subjet_phi" , &substr_subjet_phi );
+  BabyTree_->Branch("substr_subjet_dr"  , &substr_subjet_dr  );
+  BabyTree_->Branch("substr_nsubjets"   , &substr_nsubjets   );
 
   BabyTree_->Branch("lepton_nChargedPf", &lepton_nChargedPf);
   BabyTree_->Branch("lepton_nPhotonPf", &lepton_nPhotonPf);
