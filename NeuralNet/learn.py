@@ -35,7 +35,7 @@ neutralHad_pf_features = f['neutralHad_pf']
 label = f['label']
 relIso = f['relIso']
 
-global_features = numpy.transpose(numpy.array([relIso]))
+#global_features = numpy.transpose(numpy.array([relIso]))
 
 n_global_features = len(global_features[0])
 n_charged_pf_features = len(charged_pf_features[0][0])
@@ -123,7 +123,7 @@ model.compile(optimizer = 'adam', loss = 'binary_crossentropy')
 
 # Train & Test
 #nTrain = 400000
-nEpochs = 3
+nEpochs = 25
 nBatch = 10000
 
 
@@ -139,6 +139,7 @@ tpr_bdt = npzfile_bdt['tpr']
 fpr_re, tpr_re, thresh_re = metrics.roc_curve(label[nTrain:], relIso, pos_label = 1)
 fpr_nn, tpr_nn, thresh_nn = metrics.roc_curve(label[nTrain:], prediction, pos_label = 1)
 
+numpy.savez('ROCs/RelIso', tpr=tpr_re, fpr=fpr_re)
 numpy.savez('ROCs/'+savename, tpr_nn=tpr_nn, fpr_nn=fpr_nn)
 
 plt.figure()
