@@ -39,7 +39,6 @@ while True:
     for ds,loc in dslocs:
         sample = DirectorySample( dataset=ds, location=loc )
         corrupt_files = corrupt.find_corrupt_files(numpy.array([loc[7:]]))
-        print(corrupt_files)
         files = [f.name for f in sample.get_files() if f.name not in corrupt_files]
         sample.set_files(files)
         task = CondorTask(
