@@ -1,9 +1,15 @@
 import sys, os
 import time
+import itertools
+import json
+import traceback
+import numpy
 
 from metis.Sample import DirectorySample
 from metis.CondorTask import CondorTask
 from metis.StatsParser import StatsParser
+
+import corrupt
 
 job_tag = "DeepIso_v0.0.0"
 exec_path = "condor_exe.sh"
@@ -31,8 +37,13 @@ total_summary = {}
 while True:
     allcomplete = True
     for ds,loc in dslocs:
+        sample = DirectorySample( dataset=ds, location=loc )
+        corrupt_files = corrupt.find_corrupt_files(numpy.array([loc[7:]]))
+        print(corrupt_files)
+        files = [f.name for f in sample.get_files() if f.name not in corrupt_files]
+        sample.set_files(files)
         task = CondorTask(
-                sample = DirectorySample( dataset=ds, location=loc ),
+                sample = sample, 
                 open_dataset = False,
                 flush = True,
                 files_per_output = 10,
