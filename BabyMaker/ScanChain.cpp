@@ -518,6 +518,8 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("pf_neutralHad_ptRel"   , &pf_neutralHad_ptRel    );
   BabyTree_->Branch("pf_neutralHad_puppiWeight"   , &pf_neutralHad_puppiWeight    );
 
+  BabyTree_->Branch("pf_annuli_energy" , &pf_annuli_energy);
+
   return;
 }
 
