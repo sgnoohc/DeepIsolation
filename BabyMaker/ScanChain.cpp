@@ -412,6 +412,8 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         pf_neutralHad_ptRel.clear();
         pf_neutralHad_puppiWeight.clear();
 
+	pf_annuli_energy.clear();
+
       } // end lepton loop
 
     } // end loop on events in file
