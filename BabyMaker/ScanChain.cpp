@@ -277,9 +277,8 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         std::vector<std::pair<int, float> > photon_pt_ordering;
         std::vector<std::pair<int, float> > neutralHad_pt_ordering;
 
-        pf_annuli_energy.reserve(nAnnuli);      
         for (int i = 0; i < nAnnuli; i++)
-          pf_annuli_energy[i] = 0;
+          pf_annuli_energy.push_back(0);
 
         TH1D* hR = new TH1D("hR", "", nAnnuli, 0.0, coneSizeAnnuli);
 
