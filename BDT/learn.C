@@ -86,8 +86,8 @@ void learn(int nTrain)
   int nTrainSig = (int) nTrainSigF;
   int nTrainBkg = (int) nTrainBkgF;
 
-  int nTestSig = 87500;
-  int nTestBkg = 12500;
+  int nTestSig = 875000;
+  int nTestBkg = 125000;
 
   TString prepare_events = "nTrain_Signal=" + to_string(nTrainSig) + ":nTrain_Background=" + to_string(nTrainBkg) + ":nTest_Signal=" + to_string(nTestSig) + ":nTest_Background=" + to_string(nTestBkg) + ":SplitMode=Random:NormMode=NumEvents:!V";   
 
