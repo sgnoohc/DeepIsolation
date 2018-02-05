@@ -21,11 +21,21 @@ void learn(int nTrain)
   TFile* outputFile = TFile::Open("BDT.root", "RECREATE");
 
   TMVA::Factory *factory = new TMVA::Factory("TMVA", outputFile, "V:DrawProgressBar=True:Transformations=I;D;P;G:AnalysisType=Classification");
+  
+  TString path = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_*.root";
+  TChain* chain = new TChain("t");
+  chain->Add(path);
 
-  //TString rootFile = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.0/merged_ntuple_1.root";
-  TString rootFile = "DeepIsoBaby.root";
+  TObjArray *listOfFiles = chain->GetListOfFiles();
+  TIter fileIter(listOfFiles);
+  TFile *currentFile = 0;
 
-  vector<TString> vFiles = {"/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_1.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_2.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_3.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_4.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_5.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_6.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_7.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_8.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_9.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_10.root"};
+  vector<TString> vFiles;
+
+  while ( (currentFile = (TFile*)fileIter.Next()) ) 
+    vFiles.push_back(currentFile->GetTitle());
+
+  //vector<TString> vFiles = {"/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_1.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_2.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_3.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_4.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_5.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_6.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_7.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_8.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_9.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_10.root", };
   vector<TFile*> vFileSig;
   vector<TFile*> vFileBkg;
   vector<TTree*> vTreeSig;
@@ -39,42 +49,6 @@ void learn(int nTrain)
     factory->AddSignalTree(vTreeSig[i]);
     factory->AddBackgroundTree(vTreeBkg[i]);
   }
-
-  /*
-  TChain* chain = new TChain("t");
-  chain->Add(rootFile);
-
-  TObjArray *listOfFiles = chain->GetListOfFiles();
-  TIter fileIter(listOfFiles);
-  TFile *currentFile = 0;
-
-
-  while ((currentFile = (TFile*)fileIter.Next())) {
-    vFile1.push_back(currentFile->GetTitle());
-    vFile2.push_back(currentFile->GetTitle());
-    //TTree *tree = (TTree*)file.Get("t");
-  
-
-    //TTree* sig = (TTree*)file1.Get("t");
-    //TTree* bkg = (TTree*)file2.Get("t");
- 
-    //factory->AddSignalTree(sig);
-    //factory->AddBackgroundTree(bkg);
-
-    //factory->AddSignalTree((TTree*)file.Get("t"));
-    //factory->AddBackgroundTree((TTree*)file.Get("t"));
-
-    //delete tree;
-    //file.Close();  
-  } */
-
-  //TFile* file1 = TFile::Open(rootFile);
-  //TFile* file2 = TFile::Open(rootFile);
-  //TTree* signal = (TTree*)file1->Get("t");
-  //TTree* bkg = (TTree*)file2->Get("t");
-  
-  //factory->AddSignalTree(signal);
-  //factory->AddBackgroundTree(bkg);
 
   Double_t signalWeight     = 1.0;
   Double_t backgroundWeight = 1.0;
@@ -104,7 +78,6 @@ void learn(int nTrain)
   factory->AddVariable("pf_annuli_energy[5]", 'F');
   factory->AddVariable("pf_annuli_energy[6]", 'F');
   factory->AddVariable("pf_annuli_energy[7]", 'F');
-  
 
   float nTrainF = nTrain;
   float nTrainSigF = nTrainF*0.875;
