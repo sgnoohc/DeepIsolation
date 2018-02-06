@@ -16,8 +16,12 @@ int main(int argc, char* argv[])
   
   TChain *chain = new TChain("Events");
   TObjArray *tx = infile.Tokenize(",");
-  for (int i = 0; i < tx->GetEntries(); i++)
-    chain->Add(((TObjString *)(tx->At(i)))->String());
+  for (int i = 0; i < tx->GetEntries(); i++) {
+    TString fname = ((TObjString *)(tx->At(i)))->String();
+    fname.ReplaceAll("'","");
+    chain->Add(fname);
+  }
+
 
   //chain->Add(infile.Data());
   //chain->Add("/hadoop/cms/store/group/snt/run2_moriond17/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/merged_ntuple_1.root");
