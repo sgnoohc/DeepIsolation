@@ -45,6 +45,14 @@ const double coneSize = 0.5;
 const int nAnnuli = 8;
 const double coneSizeAnnuli = 1.0;
 
+double pPRel(const LorentzVector& pCand, const LorentzVector& pLep) {
+  if (pLep.pt()<=0.) return 0.;
+  LorentzVector jp4 = pLep;
+  if (subtractLep) jp4-=pCand;
+  double dot = pCand.Vect().Dot( pLep.Vect() );
+  return sqrt((dot*dot)/pLep.P2())
+}
+
 // "Good" mu/el id functions taken from Philip's old babymaker
 //_________________________________________________________________________________________________
 // Returns a vector of indices for good loose muons in CMS3.
@@ -305,19 +313,19 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           else if (abs(pf_pdg_id) == 22) candIdx = 1;
           else candIdx = 2;
 
-          bool orderByPt = true; // true = order by pT, false = order by pTRel
+          bool orderByPt = true; // true = order by pT, false = order by pPRel
 
           if (candIdx == 0) { // charged
             if (orderByPt)
               charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, pCand.pt()));
             else
-              charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, ptRel(pCand, pLep, false)));
+              charged_pt_ordering.push_back(std::pair<int, float>(lepton_nChargedPf, pPRel(pCand, pLep)));
             lepton_nChargedPf++;
 
             unordered_pf_charged_pt.push_back(pCand.pt()/pLep.pt());
             unordered_pf_charged_dR.push_back(DeltaR(pLep, pCand));
             unordered_pf_charged_alpha.push_back(alpha(pLep, pCand));
-            unordered_pf_charged_ptRel.push_back(ptRel(pCand, pLep, false));
+            unordered_pf_charged_ppRel.push_back(pPRel(pCand, pLep));
             unordered_pf_charged_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
 
             unordered_pf_charged_fromPV.push_back(cms3.pfcands_fromPV()[pIdx]);
@@ -328,13 +336,13 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
             if (orderByPt)
               photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pCand.pt()));
             else
-              photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, ptRel(pCand, pLep, false)));
+              photon_pt_ordering.push_back(std::pair<int, float>(lepton_nPhotonPf, pPRel(pCand, pLep)));
             lepton_nPhotonPf++;
 
             unordered_pf_photon_pt.push_back(pCand.pt()/pLep.pt());
             unordered_pf_photon_dR.push_back(DeltaR(pLep, pCand));
             unordered_pf_photon_alpha.push_back(alpha(pLep, pCand));
-            unordered_pf_photon_ptRel.push_back(ptRel(pCand, pLep, false));
+            unordered_pf_photon_ppRel.push_back(pPRel(pCand, pLep));
             unordered_pf_photon_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
           }
 
@@ -342,13 +350,13 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
             if (orderByPt)
               neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pCand.pt()));
             else
-              neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, ptRel(pCand, pLep, false)));
+              neutralHad_pt_ordering.push_back(std::pair<int, float>(lepton_nNeutralHadPf, pPRel(pCand, pLep)));
             lepton_nNeutralHadPf++;
 
             unordered_pf_neutralHad_pt.push_back(pCand.pt()/pLep.pt());
             unordered_pf_neutralHad_dR.push_back(DeltaR(pLep, pCand));
             unordered_pf_neutralHad_alpha.push_back(alpha(pLep, pCand));
-            unordered_pf_neutralHad_ptRel.push_back(ptRel(pCand, pLep, false));
+            unordered_pf_neutralHad_ppRel.push_back(pPRel(pCand, pLep));
             unordered_pf_neutralHad_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
           }
 
@@ -361,7 +369,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           pf_charged_pt.push_back(unordered_pf_charged_pt.at(it->first));
           pf_charged_dR.push_back(unordered_pf_charged_dR.at(it->first));
           pf_charged_alpha.push_back(unordered_pf_charged_alpha.at(it->first));
-          pf_charged_ptRel.push_back(unordered_pf_charged_ptRel.at(it->first));
+          pf_charged_pPRel.push_back(unordered_pf_charged_pPRel.at(it->first));
           pf_charged_puppiWeight.push_back(unordered_pf_charged_puppiWeight.at(it->first));
 
           pf_charged_fromPV.push_back(unordered_pf_charged_fromPV.at(it->first));
@@ -374,7 +382,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           pf_photon_pt.push_back(unordered_pf_photon_pt.at(it->first));
           pf_photon_dR.push_back(unordered_pf_photon_dR.at(it->first));
           pf_photon_alpha.push_back(unordered_pf_photon_alpha.at(it->first));
-          pf_photon_ptRel.push_back(unordered_pf_photon_ptRel.at(it->first));
+          pf_photon_pPRel.push_back(unordered_pf_photon_pPRel.at(it->first));
           pf_photon_puppiWeight.push_back(unordered_pf_photon_puppiWeight.at(it->first));
         }
 
@@ -384,7 +392,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           pf_neutralHad_pt.push_back(unordered_pf_neutralHad_pt.at(it->first));
           pf_neutralHad_dR.push_back(unordered_pf_neutralHad_dR.at(it->first));
           pf_neutralHad_alpha.push_back(unordered_pf_neutralHad_alpha.at(it->first));
-          pf_neutralHad_ptRel.push_back(unordered_pf_neutralHad_ptRel.at(it->first));
+          pf_neutralHad_pPRel.push_back(unordered_pf_neutralHad_pPRel.at(it->first));
           pf_neutralHad_puppiWeight.push_back(unordered_pf_neutralHad_puppiWeight.at(it->first));
         }
 
@@ -394,7 +402,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         pf_charged_pt.clear();
         pf_charged_dR.clear();
         pf_charged_alpha.clear();
-        pf_charged_ptRel.clear();
+        pf_charged_pPRel.clear();
         pf_charged_puppiWeight.clear();
         pf_charged_fromPV.clear();
         pf_charged_pvAssociationQuality.clear();
@@ -402,13 +410,13 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         pf_photon_pt.clear();
         pf_photon_dR.clear();
         pf_photon_alpha.clear();
-        pf_photon_ptRel.clear();
+        pf_photon_pPRel.clear();
         pf_photon_puppiWeight.clear();
 
         pf_neutralHad_pt.clear();
         pf_neutralHad_dR.clear();
         pf_neutralHad_alpha.clear();
-        pf_neutralHad_ptRel.clear();
+        pf_neutralHad_pPRel.clear();
         pf_neutralHad_puppiWeight.clear();
 
 	pf_annuli_energy.clear();
@@ -502,7 +510,7 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("pf_charged_pt"   , &pf_charged_pt    );
   BabyTree_->Branch("pf_charged_dR"   , &pf_charged_dR    );
   BabyTree_->Branch("pf_charged_alpha"   , &pf_charged_alpha    );
-  BabyTree_->Branch("pf_charged_ptRel"   , &pf_charged_ptRel    );
+  BabyTree_->Branch("pf_charged_pPRel"   , &pf_charged_pPRel    );
   BabyTree_->Branch("pf_charged_puppiWeight"   , &pf_charged_puppiWeight    );
   BabyTree_->Branch("pf_charged_fromPV"   , &pf_charged_fromPV    );
   BabyTree_->Branch("pf_charged_pvAssociationQuality"   , &pf_charged_pvAssociationQuality    );
@@ -510,13 +518,13 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("pf_photon_pt"   , &pf_photon_pt    );
   BabyTree_->Branch("pf_photon_dR"   , &pf_photon_dR    );
   BabyTree_->Branch("pf_photon_alpha"   , &pf_photon_alpha    );
-  BabyTree_->Branch("pf_photon_ptRel"   , &pf_photon_ptRel    );
+  BabyTree_->Branch("pf_photon_pPRel"   , &pf_photon_pPRel    );
   BabyTree_->Branch("pf_photon_puppiWeight"   , &pf_photon_puppiWeight    );
 
   BabyTree_->Branch("pf_neutralHad_pt"   , &pf_neutralHad_pt    );
   BabyTree_->Branch("pf_neutralHad_dR"   , &pf_neutralHad_dR    );
   BabyTree_->Branch("pf_neutralHad_alpha"   , &pf_neutralHad_alpha    );
-  BabyTree_->Branch("pf_neutralHad_ptRel"   , &pf_neutralHad_ptRel    );
+  BabyTree_->Branch("pf_neutralHad_pPRel"   , &pf_neutralHad_pPRel    );
   BabyTree_->Branch("pf_neutralHad_puppiWeight"   , &pf_neutralHad_puppiWeight    );
 
   BabyTree_->Branch("pf_annuli_energy" , &pf_annuli_energy);
