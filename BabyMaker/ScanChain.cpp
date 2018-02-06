@@ -48,9 +48,8 @@ const double coneSizeAnnuli = 1.0;
 double pPRel(const LorentzVector& pCand, const LorentzVector& pLep) {
   if (pLep.pt()<=0.) return 0.;
   LorentzVector jp4 = pLep;
-  if (subtractLep) jp4-=pCand;
   double dot = pCand.Vect().Dot( pLep.Vect() );
-  return sqrt((dot*dot)/pLep.P2())
+  return sqrt((dot*dot)/pLep.P2());
 }
 
 // "Good" mu/el id functions taken from Philip's old babymaker
@@ -264,7 +263,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         std::vector<Float_t> unordered_pf_charged_pt                     ;
         std::vector<Float_t> unordered_pf_charged_dR                     ;
         std::vector<Float_t> unordered_pf_charged_alpha                  ;
-        std::vector<Float_t> unordered_pf_charged_ptRel                  ;
+        std::vector<Float_t> unordered_pf_charged_pPRel                  ;
         std::vector<Float_t> unordered_pf_charged_puppiWeight            ;
         std::vector<Int_t>   unordered_pf_charged_fromPV                 ;
         std::vector<Int_t>   unordered_pf_charged_pvAssociationQuality   ;
@@ -272,13 +271,13 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         std::vector<Float_t> unordered_pf_photon_pt          ;
         std::vector<Float_t> unordered_pf_photon_dR          ;
         std::vector<Float_t> unordered_pf_photon_alpha       ;
-        std::vector<Float_t> unordered_pf_photon_ptRel       ;
+        std::vector<Float_t> unordered_pf_photon_pPRel       ;
         std::vector<Float_t> unordered_pf_photon_puppiWeight ;
 
         std::vector<Float_t> unordered_pf_neutralHad_pt          ;
         std::vector<Float_t> unordered_pf_neutralHad_dR          ;
         std::vector<Float_t> unordered_pf_neutralHad_alpha       ;
-        std::vector<Float_t> unordered_pf_neutralHad_ptRel       ;
+        std::vector<Float_t> unordered_pf_neutralHad_pPRel       ;
         std::vector<Float_t> unordered_pf_neutralHad_puppiWeight ;
 
         std::vector<std::pair<int, float> > charged_pt_ordering;
@@ -325,7 +324,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
             unordered_pf_charged_pt.push_back(pCand.pt()/pLep.pt());
             unordered_pf_charged_dR.push_back(DeltaR(pLep, pCand));
             unordered_pf_charged_alpha.push_back(alpha(pLep, pCand));
-            unordered_pf_charged_ppRel.push_back(pPRel(pCand, pLep));
+            unordered_pf_charged_pPRel.push_back(pPRel(pCand, pLep));
             unordered_pf_charged_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
 
             unordered_pf_charged_fromPV.push_back(cms3.pfcands_fromPV()[pIdx]);
@@ -342,7 +341,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
             unordered_pf_photon_pt.push_back(pCand.pt()/pLep.pt());
             unordered_pf_photon_dR.push_back(DeltaR(pLep, pCand));
             unordered_pf_photon_alpha.push_back(alpha(pLep, pCand));
-            unordered_pf_photon_ppRel.push_back(pPRel(pCand, pLep));
+            unordered_pf_photon_pPRel.push_back(pPRel(pCand, pLep));
             unordered_pf_photon_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
           }
 
@@ -356,7 +355,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
             unordered_pf_neutralHad_pt.push_back(pCand.pt()/pLep.pt());
             unordered_pf_neutralHad_dR.push_back(DeltaR(pLep, pCand));
             unordered_pf_neutralHad_alpha.push_back(alpha(pLep, pCand));
-            unordered_pf_neutralHad_ppRel.push_back(pPRel(pCand, pLep));
+            unordered_pf_neutralHad_pPRel.push_back(pPRel(pCand, pLep));
             unordered_pf_neutralHad_puppiWeight.push_back(cms3.pfcands_puppiWeight()[pIdx]);
           }
 
