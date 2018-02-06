@@ -7,3 +7,4 @@ eval `scramv1 runtime -sh`
 cd -
 
 ln -s ../CORE/ .
+cp -R ../CORE/ BatchSubmit/

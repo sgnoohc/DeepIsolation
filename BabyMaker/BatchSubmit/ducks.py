@@ -17,7 +17,7 @@ tar_path = "package.tar.gz"
 hadoop_path = "DeepIsolation"
 
 os.system("cp ../processBaby .")
-os.system("ln -s ../../CORE CORE")
+os.system("rm package.tar.gz")
 os.system("tar -czf package.tar.gz processBaby CORE")
 
 dslocs = [
