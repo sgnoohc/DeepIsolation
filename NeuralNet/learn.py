@@ -26,7 +26,7 @@ savename = str(sys.argv[1])
 nTrain = int(sys.argv[2])
 
 # Read features from hdf5 file
-f = h5py.File('features.hdf5', 'r')
+f = h5py.File('features_v3.hdf5', 'r')
 
 global_features = f['global']
 charged_pf_features = f['charged_pf']
@@ -35,7 +35,7 @@ neutralHad_pf_features = f['neutralHad_pf']
 label = f['label']
 relIso = f['relIso']
 
-#global_features = numpy.transpose(numpy.array([relIso]))
+global_features = numpy.transpose(numpy.array([relIso])) # uncomment this line to train with only pf cands + RelIso
 
 n_global_features = len(global_features[0])
 n_charged_pf_features = len(charged_pf_features[0][0])
@@ -100,7 +100,7 @@ lstm_neutralHad_pf = keras.layers.normalization.BatchNormalization(momentum = ba
 lstm_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_neutralHad_pf_dropout')(lstm_neutralHad_pf)
 
 # MLP to combine LSTM outputs with global features
-dropout_rate = 0.25
+dropout_rate = 0.15
 merged_features = keras.layers.concatenate([lstm_charged_pf, lstm_photon_pf, lstm_neutralHad_pf, input_global])
 deep_layer = keras.layers.Dense(200, activation = 'relu', kernel_initializer = 'lecun_uniform', name = 'mlp_1')(merged_features)
 deep_layer = keras.layers.Dropout(dropout_rate, name = 'mlp_dropout_1')(deep_layer)
@@ -159,3 +159,4 @@ value2, idx2 = utils.find_nearest(tpr_nn, 0.817)
 
 print('Neural net FPR, TPR: (%.3f, %.3f)' % (fpr_nn[idx1], tpr_nn[idx1]))
 print('Neural net FPR, TPR: (%.3f, %.3f)' % (fpr_nn[idx2], tpr_nn[idx2]))
+print('DeepIso AUC: %.3f' % metrics.auc(fpr_nn, tpr_nn))
