@@ -15,7 +15,7 @@ files = glob.glob('/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.
 
 branches = ['lepton_isFromW', 'lepton_pt', 'lepton_eta', 'lepton_phi', 'lepton_relIso03EA', 'lepton_chiso', 'lepton_nhiso', 'lepton_emiso', 'lepton_ncorriso', 'lepton_dxy', 'lepton_dz', 'lepton_ip3d', 'nvtx', 'lepton_flavor', 'lepton_nChargedPf', 'lepton_nPhotonPf', 'lepton_nNeutralHadPf', 'pf_charged_pt', 'pf_charged_dR', 'pf_charged_alpha', 'pf_charged_pPRel', 'pf_charged_puppiWeight', 'pf_charged_fromPV', 'pf_charged_pvAssociationQuality', 'pf_photon_pt', 'pf_photon_dR', 'pf_photon_alpha', 'pf_photon_pPRel', 'pf_photon_puppiWeight', 'pf_neutralHad_pt', 'pf_neutralHad_dR', 'pf_neutralHad_alpha', 'pf_neutralHad_pPRel', 'pf_neutralHad_puppiWeight']
 
-nFiles = 5 # change this as needed. Roughly 300k muons per file
+nFiles = 20 # change this as needed. Roughly 300k muons per file
 data = numpy.empty(shape=0)
 
 idx = 0
@@ -70,7 +70,7 @@ charged_pf_features, charged_pf_timestep = utils.padArray_v1(charged_pf_features
 photon_pf_features, photon_pf_timestep = utils.padArray_v1(photon_pf_features)
 neutralHad_pf_features, neutralHad_pf_timestep = utils.padArray_v1(neutralHad_pf_features)
 
-f = h5py.File("features_v3.hdf5", "w")
+f = h5py.File("features_v3_8files.hdf5", "w")
 
 dset_global = f.create_dataset("global", data=global_features)
 dset_charged_pf = f.create_dataset("charged_pf", data=charged_pf_features)
