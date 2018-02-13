@@ -56,6 +56,13 @@ class BabyMaker {
     Float_t lepton_dz            ;
     Float_t lepton_ip3d          ;
 
+    Float_t lepton_absIso01EA    ;
+    Float_t lepton_absIso02EA    ;
+    Float_t lepton_absIso03EA    ;
+    Float_t lepton_absIso04EA    ;
+    Float_t lepton_absIso05EA    ;
+    Float_t lepton_absIso06EA    ;
+
     Float_t              substr_ptrel   ;
     Float_t              substr_jetpt   ;
     Float_t              substr_subjet_pt;

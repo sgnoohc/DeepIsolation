@@ -123,7 +123,7 @@ model.compile(optimizer = 'adam', loss = 'binary_crossentropy')
 
 # Train & Test
 #nTrain = 400000
-nEpochs = 3
+nEpochs = 10
 nBatch = 10000
 
 
@@ -132,9 +132,9 @@ prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTr
 
 relIso = relIso[nTrain:]*(-1)
 
-npzfile_bdt = numpy.load('bdt_roc.npz')
-fpr_bdt = npzfile_bdt['fpr']
-tpr_bdt = npzfile_bdt['tpr']
+#npzfile_bdt = numpy.load('bdt_roc.npz')
+#fpr_bdt = npzfile_bdt['fpr']
+#tpr_bdt = npzfile_bdt['tpr']
 
 fpr_re, tpr_re, thresh_re = metrics.roc_curve(label[nTrain:], relIso, pos_label = 1)
 fpr_nn, tpr_nn, thresh_nn = metrics.roc_curve(label[nTrain:], prediction, pos_label = 1)
@@ -143,7 +143,7 @@ numpy.savez('ROCs/'+savename, tpr_nn=tpr_nn, fpr_nn=fpr_nn)
 
 plt.figure()
 plt.plot(fpr_re, tpr_re, color='darkred', lw=2, label='RelIso')
-plt.plot(fpr_bdt, tpr_bdt, color='aqua', lw=2, label='BDT trained w/sum. vars')
+#plt.plot(fpr_bdt, tpr_bdt, color='aqua', lw=2, label='BDT trained w/sum. vars')
 plt.plot(fpr_nn, tpr_nn, color = 'darkorange', lw=2, label='DeepIsolation')
 plt.xscale('log')
 plt.xlim([0.001, 1.0])

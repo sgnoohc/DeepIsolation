@@ -199,6 +199,14 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         lepton_emiso = isMu ? cms3.mus_isoR03_pf_PhotonEt()[lepIdx] : cms3.els_pfPhotonIso()[lepIdx];
         lepton_ncorriso = lepton_nhiso + lepton_emiso - evt_fixgridfastjet_all_rho() * (isMu ? muEA03(lepIdx, 1) : elEA03(lepIdx, 2));
 
+        // Lepton absolute isolations
+        lepton_absIso01EA = isMu ? muRelIsoCustomCone(lepIdx, 0.1, false, 0.5, false, true, -1, 2) : elRelIsoCustomCone(lepIdx, 0.1, false, 0.0, false, true, -1, 2);
+        lepton_absIso02EA = isMu ? muRelIsoCustomCone(lepIdx, 0.2, false, 0.5, false, true, -1, 2) : elRelIsoCustomCone(lepIdx, 0.2, false, 0.0, false, true, -1, 2);
+        lepton_absIso03EA = isMu ? muRelIsoCustomCone(lepIdx, 0.3, false, 0.5, false, true, -1, 2) : elRelIsoCustomCone(lepIdx, 0.3, false, 0.0, false, true, -1, 2);
+        lepton_absIso04EA = isMu ? muRelIsoCustomCone(lepIdx, 0.4, false, 0.5, false, true, -1, 2) : elRelIsoCustomCone(lepIdx, 0.4, false, 0.0, false, true, -1, 2);
+        lepton_absIso05EA = isMu ? muRelIsoCustomCone(lepIdx, 0.5, false, 0.5, false, true, -1, 2) : elRelIsoCustomCone(lepIdx, 0.5, false, 0.0, false, true, -1, 2);
+        lepton_absIso06EA = isMu ? muRelIsoCustomCone(lepIdx, 0.6, false, 0.5, false, true, -1, 2) : elRelIsoCustomCone(lepIdx, 0.6, false, 0.0, false, true, -1, 2);
+
         // Impact parameter
         lepton_dxy  = isMu ? cms3.mus_dxyPV()[lepIdx] : cms3.els_dxyPV()[lepIdx];
         lepton_dz   = isMu ? cms3.mus_dzPV()[lepIdx] : cms3.els_dzPV()[lepIdx];
@@ -464,6 +472,13 @@ void BabyMaker::MakeBabyNtuple(const char *BabyFilename){
   BabyTree_->Branch("lepton_dxy"   , &lepton_dxy    );
   BabyTree_->Branch("lepton_dz"   , &lepton_dz    );
   BabyTree_->Branch("lepton_ip3d"   , &lepton_ip3d    );
+
+  BabyTree_->Branch("lepton_absIso01EA"   , &lepton_absIso01EA    );
+  BabyTree_->Branch("lepton_absIso02EA"   , &lepton_absIso02EA    );
+  BabyTree_->Branch("lepton_absIso03EA"   , &lepton_absIso03EA    );
+  BabyTree_->Branch("lepton_absIso04EA"   , &lepton_absIso04EA    );
+  BabyTree_->Branch("lepton_absIso05EA"   , &lepton_absIso05EA    );
+  BabyTree_->Branch("lepton_absIso06EA"   , &lepton_absIso06EA    );
 
   BabyTree_->Branch("substr_ptrel"    , &substr_ptrel     );
   BabyTree_->Branch("substr_jetpt"    , &substr_jetpt     );
