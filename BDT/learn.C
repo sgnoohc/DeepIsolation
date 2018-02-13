@@ -21,28 +21,33 @@ void learn(int nTrain)
   TFile* outputFile = TFile::Open("BDT.root", "RECREATE");
 
   TMVA::Factory *factory = new TMVA::Factory("TMVA", outputFile, "V:DrawProgressBar=True:Transformations=I;D;P;G:AnalysisType=Classification");
-
-  TString rootFile = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.0/merged_ntuple_*.root";
- 
-
+  
+  TString path = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_*.root";
   TChain* chain = new TChain("t");
-  chain->Add(rootFile);
+  chain->Add(path);
 
   TObjArray *listOfFiles = chain->GetListOfFiles();
   TIter fileIter(listOfFiles);
   TFile *currentFile = 0;
 
-  cout << "The files are: " << endl;
-  while ((currentFile = (TFile*)fileIter.Next())) {
-    cout << "here" << endl;
-    TFile file(currentFile->GetTitle());
-    TTree *tree = (TTree*)file.Get("t");
+  vector<TString> vFiles;
 
-    factory->AddSignalTree(tree);
-    factory->AddBackgroundTree(tree);
+  while ( (currentFile = (TFile*)fileIter.Next()) ) 
+    vFiles.push_back(currentFile->GetTitle());
 
-    delete tree;
-    file.Close();  
+  //vector<TString> vFiles = {"/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_1.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_2.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_3.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_4.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_5.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_6.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_7.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_8.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_9.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_10.root", };
+  vector<TFile*> vFileSig;
+  vector<TFile*> vFileBkg;
+  vector<TTree*> vTreeSig;
+  vector<TTree*> vTreeBkg;
+  
+  for (int i = 0; i < vFiles.size(); i++) {
+    vFileSig.push_back(TFile::Open(vFiles[i]));
+    vFileBkg.push_back(TFile::Open(vFiles[i]));
+    vTreeSig.push_back((TTree*)vFileSig[i]->Get("t"));
+    vTreeBkg.push_back((TTree*)vFileBkg[i]->Get("t"));
+    factory->AddSignalTree(vTreeSig[i]);
+    factory->AddBackgroundTree(vTreeBkg[i]);
   }
 
   Double_t signalWeight     = 1.0;
@@ -64,7 +69,7 @@ void learn(int nTrain)
   factory->AddVariable("lepton_nPhotonPf", 'I');
   factory->AddVariable("lepton_nNeutralHadPf", 'I');
   factory->AddVariable("nvtx", 'I');
-
+  
   factory->AddVariable("pf_annuli_energy[0]", 'F');
   factory->AddVariable("pf_annuli_energy[1]", 'F');
   factory->AddVariable("pf_annuli_energy[2]", 'F');
@@ -74,8 +79,6 @@ void learn(int nTrain)
   factory->AddVariable("pf_annuli_energy[6]", 'F');
   factory->AddVariable("pf_annuli_energy[7]", 'F');
 
-  cout << "nTrain is " << nTrain << endl;
-
   float nTrainF = nTrain;
   float nTrainSigF = nTrainF*0.875;
   float nTrainBkgF = nTrainF*0.125;
@@ -83,9 +86,10 @@ void learn(int nTrain)
   int nTrainSig = (int) nTrainSigF;
   int nTrainBkg = (int) nTrainBkgF;
 
-  cout << nTrainSig << " " << nTrainBkg << endl;
+  int nTestSig = 875000;
+  int nTestBkg = 125000;
 
-  TString prepare_events = "nTrain_Signal=" + to_string(nTrainSig) + ":nTrain_Background=" + to_string(nTrainBkg) + ":nTest_Signal=" + to_string(nTrainSig) + ":nTest_Background=" + to_string(nTrainBkg) + ":SplitMode=Alternate:NormMode=NumEvents:!V";   
+  TString prepare_events = "nTrain_Signal=" + to_string(nTrainSig) + ":nTrain_Background=" + to_string(nTrainBkg) + ":nTest_Signal=" + to_string(nTestSig) + ":nTest_Background=" + to_string(nTestBkg) + ":SplitMode=Random:NormMode=NumEvents:!V";   
 
   factory->PrepareTrainingAndTestTree("lepton_isFromW==1&&lepton_flavor==1", "lepton_isFromW==0&&lepton_flavor==1", prepare_events);
   factory->SetSignalWeightExpression("1");

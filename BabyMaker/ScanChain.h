@@ -100,7 +100,7 @@ class BabyMaker {
     std::vector<Float_t> pf_charged_pt                     ;
     std::vector<Float_t> pf_charged_dR                     ;
     std::vector<Float_t> pf_charged_alpha                  ;
-    std::vector<Float_t> pf_charged_ptRel                  ;
+    std::vector<Float_t> pf_charged_pPRel                  ;
     std::vector<Float_t> pf_charged_puppiWeight            ;
     std::vector<Int_t>   pf_charged_fromPV                 ;
     std::vector<Int_t>   pf_charged_pvAssociationQuality   ;
@@ -108,13 +108,13 @@ class BabyMaker {
     std::vector<Float_t> pf_photon_pt          ;
     std::vector<Float_t> pf_photon_dR          ;
     std::vector<Float_t> pf_photon_alpha       ;
-    std::vector<Float_t> pf_photon_ptRel       ;
+    std::vector<Float_t> pf_photon_pPRel       ;
     std::vector<Float_t> pf_photon_puppiWeight ;
 
     std::vector<Float_t> pf_neutralHad_pt          ;
     std::vector<Float_t> pf_neutralHad_dR          ;
     std::vector<Float_t> pf_neutralHad_alpha       ;
-    std::vector<Float_t> pf_neutralHad_ptRel       ;
+    std::vector<Float_t> pf_neutralHad_pPRel       ;
     std::vector<Float_t> pf_neutralHad_puppiWeight ;
 
     std::vector<Float_t> pf_annuli_energy;

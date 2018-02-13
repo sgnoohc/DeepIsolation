@@ -2,6 +2,7 @@ import ROOT
 import numpy
 import root_numpy
 import h5py
+import glob
 
 import matplotlib
 matplotlib.use('Agg')
@@ -10,28 +11,34 @@ import matplotlib.pyplot as plt
 import utils
 
 # Read data from ROOT file
-f = ROOT.TFile('../BabyMaker/unknown_dummy1.root')
-tree = f.Get("t")
+files = glob.glob('/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.3/merged_ntuple_*.root')
 
-#substr_ptrel    = 11.5654
-#substr_sumdij   = 0.416575
-#substr_maxdij   = 0.36509
-#substr_mindij   = 0.000708458
-#substr_ndij     = 5
-#substr_subjet_pt = 7.42742
-#substr_subjet_dr = 0.26519
-#substr_nsubjets = 1
-#substr_nreclsj  = 3
+branches = ['lepton_isFromW', 'lepton_pt', 'lepton_eta', 'lepton_phi', 'lepton_relIso03EA', 'lepton_chiso', 'lepton_nhiso', 'lepton_emiso', 'lepton_ncorriso', 'lepton_dxy', 'lepton_dz', 'lepton_ip3d', 'nvtx', 'lepton_flavor', 'lepton_nChargedPf', 'lepton_nPhotonPf', 'lepton_nNeutralHadPf', 'pf_charged_pt', 'pf_charged_dR', 'pf_charged_alpha', 'pf_charged_pPRel', 'pf_charged_puppiWeight', 'pf_charged_fromPV', 'pf_charged_pvAssociationQuality', 'pf_photon_pt', 'pf_photon_dR', 'pf_photon_alpha', 'pf_photon_pPRel', 'pf_photon_puppiWeight', 'pf_neutralHad_pt', 'pf_neutralHad_dR', 'pf_neutralHad_alpha', 'pf_neutralHad_pPRel', 'pf_neutralHad_puppiWeight']
 
-branches = ['substr_ptrel', 'lepton_isFromW', 'lepton_pt', 'lepton_eta', 'lepton_phi', 'lepton_relIso03EA', 'lepton_chiso', 'lepton_nhiso', 'lepton_emiso', 'lepton_ncorriso', 'lepton_dxy', 'lepton_dz', 'lepton_ip3d', 'nvtx', 'lepton_flavor', 'lepton_nChargedPf', 'lepton_nPhotonPf', 'lepton_nNeutralHadPf', 'pf_charged_pt', 'pf_charged_dR', 'pf_charged_alpha', 'pf_charged_ptRel', 'pf_charged_puppiWeight', 'pf_charged_fromPV', 'pf_charged_pvAssociationQuality', 'pf_photon_pt', 'pf_photon_dR', 'pf_photon_alpha', 'pf_photon_ptRel', 'pf_photon_puppiWeight', 'pf_neutralHad_pt', 'pf_neutralHad_dR', 'pf_neutralHad_alpha', 'pf_neutralHad_ptRel', 'pf_neutralHad_puppiWeight']
-data = root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 1')
+nFiles = 20 # change this as needed. Roughly 300k muons per file
+data = numpy.empty(shape=0)
+
+idx = 0
+for file in files:
+  if idx >= nFiles:
+    break
+
+  f = ROOT.TFile(file)
+  tree = f.Get("t")
+  if len(data) == 0:
+    data = root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 1')
+  else:
+    data = numpy.append(data, root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 1'))
+
+  print(len(data['lepton_isFromW']))
+  idx += 1
 
 # Grab features
-global_features = numpy.array([data['substr_ptrel'], data['lepton_pt'], data['lepton_eta'], data['lepton_phi'], data['lepton_relIso03EA'], data['lepton_chiso'], data['lepton_nhiso'], data['lepton_emiso'], data['lepton_ncorriso'], data['lepton_dxy'], data['lepton_dz'], data['lepton_ip3d'], data['nvtx'], data['lepton_flavor'], data['lepton_nChargedPf'], data['lepton_nPhotonPf'], data['lepton_nNeutralHadPf']])
+global_features = numpy.array([data['lepton_pt'], data['lepton_eta'], data['lepton_phi'], data['lepton_relIso03EA'], data['lepton_chiso'], data['lepton_nhiso'], data['lepton_emiso'], data['lepton_ncorriso'], data['lepton_dxy'], data['lepton_dz'], data['lepton_ip3d'], data['nvtx'], data['lepton_flavor'], data['lepton_nChargedPf'], data['lepton_nPhotonPf'], data['lepton_nNeutralHadPf']])
 #global_features = numpy.array([data['lepton_relIso03EA']])
-charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'], data['pf_charged_alpha'], data['pf_charged_ptRel'], data['pf_charged_puppiWeight'], data['pf_charged_fromPV'], data['pf_charged_pvAssociationQuality']])
-photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_alpha'], data['pf_photon_ptRel'], data['pf_photon_puppiWeight']])
-neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_alpha'], data['pf_neutralHad_ptRel'], data['pf_neutralHad_puppiWeight']])
+charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'], data['pf_charged_alpha'], data['pf_charged_pPRel'], data['pf_charged_puppiWeight'], data['pf_charged_fromPV'], data['pf_charged_pvAssociationQuality']])
+photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_alpha'], data['pf_photon_pPRel'], data['pf_photon_puppiWeight']])
+neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_alpha'], data['pf_neutralHad_pPRel'], data['pf_neutralHad_puppiWeight']])
 #charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'], data['pf_charged_alpha'], data['pf_charged_puppiWeight'], data['pf_charged_fromPV'], data['pf_charged_pvAssociationQuality']])
 #photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_alpha'], data['pf_photon_puppiWeight']])
 #neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_alpha'], data['pf_neutralHad_puppiWeight']])
@@ -63,7 +70,7 @@ charged_pf_features, charged_pf_timestep = utils.padArray_v1(charged_pf_features
 photon_pf_features, photon_pf_timestep = utils.padArray_v1(photon_pf_features)
 neutralHad_pf_features, neutralHad_pf_timestep = utils.padArray_v1(neutralHad_pf_features)
 
-f = h5py.File("features.hdf5", "w")
+f = h5py.File("features_v3_8files.hdf5", "w")
 
 dset_global = f.create_dataset("global", data=global_features)
 dset_charged_pf = f.create_dataset("charged_pf", data=charged_pf_features)
