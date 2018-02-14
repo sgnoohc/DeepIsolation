@@ -26,7 +26,7 @@ savename = str(sys.argv[1])
 nTrain = int(sys.argv[2])
 
 # Read features from hdf5 file
-f = h5py.File('features.hdf5', 'r')
+f = h5py.File('features_PPRO_2412k.hdf5', 'r')
 
 global_features = f['global']
 charged_pf_features = f['charged_pf']
@@ -76,13 +76,13 @@ conv_photon_pf = keras.layers.Convolution1D(24, 1, kernel_initializer = 'lecun_u
 conv_photon_pf = keras.layers.Dropout(dropout_rate, name = 'ppf_dropout_1')(conv_photon_pf)
 conv_photon_pf = keras.layers.Convolution1D(12, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_2')(conv_photon_pf)
 conv_photon_pf = keras.layers.Dropout(dropout_rate, name = 'ppf_dropout_2')(conv_photon_pf)
-conv_photon_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_3')(conv_photon_pf)
+conv_photon_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_photon_pf_4')(conv_photon_pf)
 
 conv_neutralHad_pf = keras.layers.Convolution1D(24, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_1')(input_neutralHad_pf)
 conv_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'npf_dropout_1')(conv_neutralHad_pf)
 conv_neutralHad_pf = keras.layers.Convolution1D(12, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_2')(conv_neutralHad_pf)
 conv_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'npf_dropout_2')(conv_neutralHad_pf)
-conv_neutralHad_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_3')(conv_neutralHad_pf)
+conv_neutralHad_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_4')(conv_neutralHad_pf)
 
 # LSTMs for pf cands
 batch_momentum = 0.6
@@ -125,18 +125,20 @@ model.compile(optimizer = 'adam', loss = 'binary_crossentropy')
 nEpochs = 25
 nBatch = 10000
 
-weights_file = "weights/"+savename+"_weights.hdf5"
-checkpoint = keras.callbacks.ModelCheckpoint(weights_file, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+weights_file = "weights/"+savename+"_weights_{epoch:02d}.hdf5"
+checkpoint = keras.callbacks.ModelCheckpoint(weights_file) # save after every epoch 
 callbacks_list = [checkpoint]
 
 validation_data = ([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], label[nTrain:])
 
 #model.load_weights(weights_file)
-model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list, validation_data = validation_data)
+#model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list, validation_data = validation_data)
+model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch)
 prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
 
 prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], batch_size = nBatch) 
 
+relIso = numpy.array(relIso)
 relIso = relIso*(-1)
 
 npzfile_bdt = numpy.load('bdt_roc.npz')
