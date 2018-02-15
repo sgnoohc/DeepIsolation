@@ -1,3 +1,7 @@
+### evaluate_convergence.py
+### This program trains a DeepIsolation model (delivered by model.py) and examines the convergence by plotting training/testing AUC as a function of number of epcohs
+
+
 import tensorflow as tf
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -56,53 +60,45 @@ print(len(label))
 model = model.base(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, n_global_features)
 
 # Train & Test
-nEpochs = 25
+nEpochs = 5
 nBatch = 10000
 
 weights_file = "weights/"+savename+"_weights_{epoch:02d}.hdf5"
 checkpoint = keras.callbacks.ModelCheckpoint(weights_file) # save after every epoch 
 callbacks_list = [checkpoint]
 
-validation_data = ([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], label[nTrain:])
+#validation_data = ([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], label[nTrain:])
 
 #model.load_weights(weights_file)
-model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list, validation_data = validation_data)
-#model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch)
-prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
+model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
 
-prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], batch_size = nBatch) 
 
 relIso = numpy.array(relIso)
 relIso = relIso*(-1)
 
-npzfile_bdt = numpy.load('bdt_roc.npz')
-fpr_bdt = npzfile_bdt['fpr']
-tpr_bdt = npzfile_bdt['tpr']
+auc_test = numpy.zeros(nEpochs)
+auc_train = numpy.zeros(nEpochs)
+x = numpy.linspace(1, nEpochs, nEpochs)
 
-fpr_re, tpr_re, thresh_re = metrics.roc_curve(label[nTrain:], relIso[nTrain:], pos_label = 1)
-fpr_nn, tpr_nn, thresh_nn = metrics.roc_curve(label[nTrain:], prediction, pos_label = 1)
+for i in range(nEpochs):
+  model.load_weights("weights/"+savename+"_weights_" + str(i+1).zfill(2) + ".hdf5")
+  prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
+  prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], batch_size = nBatch) 
+  
+  fpr_nn, tpr_nn, thresh_nn = metrics.roc_curve(label[nTrain:], prediction, pos_label = 1)
+  fpr_nn_train, tpr_nn_train, thresh_nn_train = metrics.roc_curve(label[:nTrain], prediction_training_set, pos_label=1)
 
-fpr_nn_train, tpr_nn_train, thresh_nn_train = metrics.roc_curve(label[:nTrain], prediction_training_set, pos_label=1)
-
-numpy.savez('ROCs/RelIso', tpr=tpr_re, fpr=fpr_re)
-numpy.savez('ROCs/'+savename, tpr_nn=tpr_nn, fpr_nn=fpr_nn)
+  auc_test[i] = metrics.auc(fpr_nn, tpr_nn)
+  auc_train[i] = metrics.auc(fpr_nn_train, tpr_nn_train)
 
 plt.figure()
-plt.plot(fpr_re, tpr_re, color='darkred', lw=2, label='RelIso')
-plt.plot(fpr_bdt, tpr_bdt, color='aqua', lw=2, label='BDT trained w/sum. vars')
-plt.plot(fpr_nn, tpr_nn, color = 'darkorange', lw=2, label='DeepIsolation')
-plt.xscale('log')
-plt.xlim([0.001, 1.0])
-plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.legend(loc='lower right')
-plt.savefig('plot.pdf')
+plt.plot(x, auc_test, color = 'red', label = 'Testing')
+plt.plot(x, auc_train, color = 'blue', label = 'Training')
+plt.ylim([0.9,1.0])
+plt.legend(loc = 'upper right')
+plt.xlabel("Epoch")
+plt.ylabel("AUC")
+plt.savefig("convergence.pdf")
 
-value1, idx1 = utils.find_nearest(fpr_nn, 0.087)
-value2, idx2 = utils.find_nearest(tpr_nn, 0.817)
-
-print('Neural net FPR, TPR: (%.3f, %.3f)' % (fpr_nn[idx1], tpr_nn[idx1]))
-print('Neural net FPR, TPR: (%.3f, %.3f)' % (fpr_nn[idx2], tpr_nn[idx2]))
-print('DeepIso AUC: %.3f' % metrics.auc(fpr_nn, tpr_nn))
-print('DeepIso AUC (training set): %.3f' % metrics.auc(fpr_nn_train, tpr_nn_train))
+print('Best testing AUC: %.5f' % max(auc_test))
+print('Corresponding training AUC: %.5f' % auc_train[auc_test.argmax()])
