@@ -60,7 +60,7 @@ print(len(label))
 model = model.base(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, n_global_features)
 
 # Train & Test
-nEpochs = 25
+nEpochs = 1
 nBatch = 10000
 
 weights_file = "weights/"+savename+"_weights_{epoch:02d}.hdf5"
@@ -101,6 +101,8 @@ plt.legend(loc = 'upper right')
 plt.xlabel("Epoch")
 plt.ylabel("AUC")
 plt.savefig("convergence.pdf")
+
+numpy.savez('weights/convergence_' + savename, auc_test = auc_test, auc_train = auc_train)
 
 print('Best testing AUC: %.5f' % max(auc_test))
 print('Corresponding training AUC: %.5f' % auc_train[auc_test.argmax()])
