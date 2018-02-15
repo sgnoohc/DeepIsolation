@@ -31,7 +31,7 @@ savename = str(sys.argv[1])
 nTrain = int(sys.argv[2])
 
 # Read features from hdf5 file
-f = h5py.File('features_PPRO_2412k.hdf5', 'r')
+f = h5py.File('features_v3.hdf5', 'r')
 
 global_features = f['global']
 charged_pf_features = f['charged_pf']
@@ -60,7 +60,7 @@ print(len(label))
 model = model.base(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, n_global_features)
 
 # Train & Test
-nEpochs = 5
+nEpochs = 25
 nBatch = 10000
 
 weights_file = "weights/"+savename+"_weights_{epoch:02d}.hdf5"
@@ -92,9 +92,11 @@ for i in range(nEpochs):
   auc_train[i] = metrics.auc(fpr_nn_train, tpr_nn_train)
 
 plt.figure()
-plt.plot(x, auc_test, color = 'red', label = 'Testing')
+plt.plot(x, auc_test, color = 'cyan', label = 'Testing')
 plt.plot(x, auc_train, color = 'blue', label = 'Training')
-plt.ylim([0.9,1.0])
+plt.plot(x, np.ones_like(x)*0.977, 'b-', label = 'BDT')
+plt.plot(x, np.ones_like(x)*0.922, 'r-', label = 'RelIso')
+plt.ylim([0.75,1.0])
 plt.legend(loc = 'upper right')
 plt.xlabel("Epoch")
 plt.ylabel("AUC")
