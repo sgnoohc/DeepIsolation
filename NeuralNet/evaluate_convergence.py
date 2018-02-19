@@ -88,11 +88,13 @@ for i in range(nEpochs):
  
 
   plt.figure()
-  plt.hist(prediction[label[nTrain:].astype(bool)], bins = 100, label = 'Signal', color = 'red')
+  plt.hist(prediction[(label[nTrain:]).astype(bool)], bins = 100, label = 'Signal', color = 'red')
   plt.hist(prediction[numpy.logical_not(label[nTrain:])], bins = 100, label = 'Background', color = 'blue')
   plt.legend(loc = 'upper left')
   plt.xlabel('DeepIsolation Discriminant')
   plt.ylabel('Events')
+  plt.xlim([0.0,1.0])
+  plt.yscale('log', nonposy='clip')
   plt.savefig("weights/discriminant_" + str(i+1).zfill(2) + ".pdf") 
   plt.clf()
 
