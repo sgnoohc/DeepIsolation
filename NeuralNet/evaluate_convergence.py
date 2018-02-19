@@ -31,7 +31,7 @@ savename = str(sys.argv[1])
 nTrain = int(sys.argv[2])
 
 # Read features from hdf5 file
-f = h5py.File('features_v3.hdf5', 'r')
+f = h5py.File('features_PPRO_2412k.hdf5', 'r')
 
 global_features = f['global']
 charged_pf_features = f['charged_pf']
@@ -61,7 +61,7 @@ model = model.base(charged_pf_timestep, n_charged_pf_features, photon_pf_timeste
 
 # Train & Test
 nEpochs = 1
-nBatch = 10000
+nBatch = 2500
 
 weights_file = "weights/"+savename+"_weights_{epoch:02d}.hdf5"
 checkpoint = keras.callbacks.ModelCheckpoint(weights_file) # save after every epoch 
@@ -81,10 +81,21 @@ auc_train = numpy.zeros(nEpochs)
 x = numpy.linspace(1, nEpochs, nEpochs)
 
 for i in range(nEpochs):
+  print(i)
   model.load_weights("weights/"+savename+"_weights_" + str(i+1).zfill(2) + ".hdf5")
   prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
   prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], batch_size = nBatch) 
-  
+ 
+
+  plt.figure()
+  plt.hist(prediction[label[nTrain:]], bins = 100, label = 'Signal', color = 'red')
+  plt.hist(prediction[not label[nTrain:]], bins = 100, label = 'Background', color = 'blue')
+  plt.legend(loc = 'upper left')
+  plt.xlabel('DeepIsolation Discriminant')
+  plt.ylabel('Events')
+  plt.savefig("weights/discriminant_" + str(i+1).zfill(2) + ".pdf") 
+  plt.clf()
+
   fpr_nn, tpr_nn, thresh_nn = metrics.roc_curve(label[nTrain:], prediction, pos_label = 1)
   fpr_nn_train, tpr_nn_train, thresh_nn_train = metrics.roc_curve(label[:nTrain], prediction_training_set, pos_label=1)
 
@@ -92,12 +103,12 @@ for i in range(nEpochs):
   auc_train[i] = metrics.auc(fpr_nn_train, tpr_nn_train)
 
 plt.figure()
-plt.plot(x, auc_test, color = 'cyan', label = 'Testing')
+plt.plot(x, auc_test, color = 'red', label = 'Testing')
 plt.plot(x, auc_train, color = 'blue', label = 'Training')
-plt.plot(x, np.ones_like(x)*0.977, 'b-', label = 'BDT')
-plt.plot(x, np.ones_like(x)*0.922, 'r-', label = 'RelIso')
-plt.ylim([0.75,1.0])
-plt.legend(loc = 'upper right')
+#plt.plot(x, numpy.ones_like(x)*0.977, 'b-', label = 'BDT')
+#plt.plot(x, numpy.ones_like(x)*0.922, 'r-', label = 'RelIso')
+plt.ylim([0.9,1.0])
+plt.legend(loc = 'upper left')
 plt.xlabel("Epoch")
 plt.ylabel("AUC")
 plt.savefig("convergence.pdf")
