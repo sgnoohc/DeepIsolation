@@ -89,7 +89,7 @@ for i in range(nEpochs):
 
   plt.figure()
   plt.hist(prediction[label[nTrain:]], bins = 100, label = 'Signal', color = 'red')
-  plt.hist(prediction[not label[nTrain:]], bins = 100, label = 'Background', color = 'blue')
+  plt.hist(prediction[numpy.logical_not(label[nTrain:])], bins = 100, label = 'Background', color = 'blue')
   plt.legend(loc = 'upper left')
   plt.xlabel('DeepIsolation Discriminant')
   plt.ylabel('Events')
