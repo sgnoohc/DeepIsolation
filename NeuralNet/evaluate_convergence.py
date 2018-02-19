@@ -31,7 +31,7 @@ savename = str(sys.argv[1])
 nTrain = int(sys.argv[2])
 
 # Read features from hdf5 file
-f = h5py.File('features_PPRO_2412k.hdf5', 'r')
+f = h5py.File('features.hdf5', 'r')
 
 global_features = f['global']
 charged_pf_features = f['charged_pf']
@@ -88,7 +88,7 @@ for i in range(nEpochs):
  
 
   plt.figure()
-  plt.hist(prediction[label[nTrain:]], bins = 100, label = 'Signal', color = 'red')
+  plt.hist(prediction[label[nTrain:].astype(bool)], bins = 100, label = 'Signal', color = 'red')
   plt.hist(prediction[numpy.logical_not(label[nTrain:])], bins = 100, label = 'Background', color = 'blue')
   plt.legend(loc = 'upper left')
   plt.xlabel('DeepIsolation Discriminant')
