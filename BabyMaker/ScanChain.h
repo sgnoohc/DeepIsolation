@@ -96,6 +96,7 @@ class BabyMaker {
     Int_t   lepton_nChargedPf    ;
     Int_t   lepton_nPhotonPf     ;
     Int_t   lepton_nNeutralHadPf ;
+    Int_t   lepton_nOuterPf     ;
 
     std::vector<Float_t> pf_charged_pt                     ;
     std::vector<Float_t> pf_charged_dR                     ;
@@ -116,6 +117,12 @@ class BabyMaker {
     std::vector<Float_t> pf_neutralHad_alpha       ;
     std::vector<Float_t> pf_neutralHad_pPRel       ;
     std::vector<Float_t> pf_neutralHad_puppiWeight ;
+
+    std::vector<Float_t> pf_outer_pt          ;
+    std::vector<Float_t> pf_outer_dR          ;
+    std::vector<Float_t> pf_outer_alpha       ;
+    std::vector<Float_t> pf_outer_pPRel       ;
+    std::vector<Float_t> pf_outer_type        ;
 
     std::vector<Float_t> pf_annuli_energy;
 };
