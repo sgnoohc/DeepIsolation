@@ -14,7 +14,10 @@ hadoop_path = "DeepIsolation"
 
 import corrupt
 
-os.system("tar -czf package.tar.gz ../processBaby ../../CORE")
+os.system("rm processBaby")
+os.system("rm package.tar.gz")
+os.system("cp ../processBaby .") # for some reason this doesn't like to update
+os.system("tar -czf package.tar.gz processBaby CORE")
 
 dslocs = [
     [ "/TTbar", "/hadoop/cms/store/group/snt/run2_moriond17/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/" ] , 
@@ -37,7 +40,6 @@ while True:
     for ds,loc in dslocs:
         sample = DirectorySample( dataset=ds, location=loc )
         corrupt_files = corrupt.find_corrupt_files(numpy.array([loc[7:]]))
-        print(corrupt_files)
         files = [f.name for f in sample.get_files() if f.name not in corrupt_files]
         sample.set_files(files)
         task = CondorTask(
