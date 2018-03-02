@@ -26,8 +26,8 @@ for file in files:
   f = ROOT.TFile(file)
   tree = f.Get("t")
   if len(data) == 0:
-    #data = root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 0')
-    data = root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 1')
+    #data = root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 0') # electrons
+    data = root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 1') # muons
   else:
     #data = numpy.append(data, root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 0'))
     data = numpy.append(data, root_numpy.tree2array(tree, branches = branches, selection = 'lepton_flavor == 1'))

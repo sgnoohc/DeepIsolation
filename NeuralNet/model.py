@@ -101,9 +101,9 @@ def extended_cone(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep
   conv_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'npf_dropout_2')(conv_neutralHad_pf)
   conv_neutralHad_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_4')(conv_neutralHad_pf)
 
-  conv_outer_pf = keras.layers.Convolution1D(16, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_outer_pf_1')(input_outer_pf)
+  conv_outer_pf = keras.layers.Convolution1D(24, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_outer_pf_1')(input_outer_pf)
   conv_outer_pf = keras.layers.Dropout(dropout_rate, name = 'ppf_dropout_1')(conv_outer_pf)
-  conv_outer_pf = keras.layers.Convolution1D(8, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_outer_pf_2')(conv_outer_pf)
+  conv_outer_pf = keras.layers.Convolution1D(12, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_outer_pf_2')(conv_outer_pf)
   conv_outer_pf = keras.layers.Dropout(dropout_rate, name = 'ppf_dropout_2')(conv_outer_pf)
   conv_outer_pf = keras.layers.Convolution1D(2, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_outer_pf_4')(conv_outer_pf)
 
