@@ -111,15 +111,15 @@ def extended_cone(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep
   batch_momentum = 0.6
   go_backwards = False
 
-  lstm_charged_pf = keras.layers.LSTM(150, implementation = 2, name ='lstm_charged_pf_1', go_backwards = go_backwards)(conv_charged_pf)
+  lstm_charged_pf = keras.layers.LSTM(100, implementation = 2, name ='lstm_charged_pf_1', go_backwards = go_backwards)(conv_charged_pf)
   lstm_charged_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_charged_pf_batchnorm')(lstm_charged_pf)
   lstm_charged_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_charged_pf_dropout')(lstm_charged_pf)
 
-  lstm_photon_pf = keras.layers.LSTM(100, implementation = 2, name = 'lstm_photon_pf_1', go_backwards = go_backwards)(conv_photon_pf)
+  lstm_photon_pf = keras.layers.LSTM(50, implementation = 2, name = 'lstm_photon_pf_1', go_backwards = go_backwards)(conv_photon_pf)
   lstm_photon_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_photon_pf_batchnorm')(lstm_photon_pf)
   lstm_photon_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_photon_pf_dropout')(lstm_photon_pf)
 
-  lstm_neutralHad_pf = keras.layers.LSTM(50, implementation = 2, name = 'lstm_neutralHad_pf_1', go_backwards = go_backwards)(conv_neutralHad_pf)
+  lstm_neutralHad_pf = keras.layers.LSTM(25, implementation = 2, name = 'lstm_neutralHad_pf_1', go_backwards = go_backwards)(conv_neutralHad_pf)
   lstm_neutralHad_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_neutralHad_pf_batchnorm')(lstm_neutralHad_pf)
   lstm_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_neutralHad_pf_dropout')(lstm_neutralHad_pf)
 

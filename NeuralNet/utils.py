@@ -119,11 +119,11 @@ def preprocess_alt(array):
   array *= 1/(maxVal - minVal)
   return array
 
-def preprocess_pf(array):
+def preprocess_pf(array, candLimit):
   tempArray = []
   for element in array:
-    for subElement in element:
-      tempArray.append(subElement)
+    for i in range(min(len(element), candLimit)):
+      tempArray.append(element[i])
   std = numpy.std(tempArray)
   array *= 1/std
   mean = numpy.mean(tempArray)
