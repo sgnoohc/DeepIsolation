@@ -41,7 +41,7 @@
 using namespace std;
 using namespace tas;
 
-const double coneSize = 0.5;
+const double coneSize = 1.0;
 const int nAnnuli = 8;
 const double coneSizeAnnuli = 1.0;
 
@@ -552,8 +552,6 @@ void BabyMaker::InitBabyNtuple () {
   evt    = -1;
 
   nvtx   = -999;
-
-  //pf_charged_pt.clear()
 
   return;
 }
