@@ -426,6 +426,16 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
           pf_neutralHad_puppiWeight.push_back(unordered_pf_neutralHad_puppiWeight.at(it->first));
         }
 
+        // Sort outer cands
+        std::sort(outer_pt_ordering.begin(), outer_pt_ordering.end(), sortByValue);
+        for (std::vector<std::pair<int, float> >::iterator it = outer_pt_ordering.begin(); it != outer_pt_ordering.end(); ++it) {
+          pf_outer_pt.push_back(unordered_pf_outer_pt.at(it->first));
+          pf_outer_dR.push_back(unordered_pf_outer_dR.at(it->first));
+          pf_outer_alpha.push_back(unordered_pf_outer_alpha.at(it->first));
+          pf_outer_pPRel.push_back(unordered_pf_outer_pPRel.at(it->first));
+          pf_outer_type.push_back(unordered_pf_outer_type.at(it->first));
+        }
+
         FillBabyNtuple();
         nLeptons++;
 
