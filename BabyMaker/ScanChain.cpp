@@ -41,7 +41,7 @@
 using namespace std;
 using namespace tas;
 
-const double coneSize = 0.4;
+const double coneSize = 0.5;
 const int nAnnuli = 8;
 const double coneSizeAnnuli = 1.0;
 
@@ -66,7 +66,7 @@ std::vector<unsigned int> goodMuonIdx()
         if (!( fabs(cms3.mus_p4()[imu].eta())    <=  2.4  )) continue;
         if (!( fabs(cms3.mus_dxyPV()[imu])       <=  0.05 )) continue;
         if (!( fabs(cms3.mus_dzPV()[imu])        <=  0.1  )) continue;
-        if (!( muRelIso03EA( imu, 1 )            <   0.5  )) continue;
+        //if (!( muRelIso03EA( imu, 1 )            <   0.5  )) continue;
         good_muon_idx.push_back( imu );
     }
     return good_muon_idx;
@@ -86,7 +86,7 @@ std::vector<unsigned int> goodElecIdx()
         if (!( fabs(cms3.els_p4()[iel].eta())    <=  2.5  )) continue;
         if (!( fabs(cms3.els_dxyPV()[iel])       <=  0.05 )) continue;
         if (!( fabs(cms3.els_dzPV()[iel])        <=  0.1  )) continue;
-        if (!( eleRelIso03EA( iel, 2 )           <   0.5  )) continue;
+        //if (!( eleRelIso03EA( iel, 2 )           <   0.5  )) continue;
         good_elec_idx.push_back( iel );
     }
     return good_elec_idx;
@@ -200,7 +200,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         lepton_isFromLF = isFromLightFake(abs(pdgid), lepIdx);
 
         // Lepton isolation vars
-        lepton_relIso03EA = isMu ? muRelIso03EA(lepIdx, 1) : eleRelIso03EA(lepIdx, 2);
+        lepton_relIso03EA = isMu ? muRelIso03EA(lepIdx, 2) : eleRelIso03EA(lepIdx, 2);
         lepton_chiso = isMu ? cms3.mus_isoR03_pf_ChargedHadronPt()[lepIdx] : cms3.els_pfChargedHadronIso()[lepIdx];
         lepton_nhiso = isMu ? cms3.mus_isoR03_pf_NeutralHadronEt()[lepIdx] : cms3.els_pfNeutralHadronIso()[lepIdx];
         lepton_emiso = isMu ? cms3.mus_isoR03_pf_PhotonEt()[lepIdx] : cms3.els_pfPhotonIso()[lepIdx];
