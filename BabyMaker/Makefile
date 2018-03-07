@@ -4,10 +4,12 @@ FASTJETCFG = $(shell /cvmfs/cms.cern.ch/slc6_amd64_gcc630/external/fastjet/3.1.0
 CC = g++
 CFLAGS = -g -std=c++1y
 
-TARGET = processBaby
+TARGET = processBaby deriveWeights
 
 all: $(TARGET)
 
 processBaby: ScanChain.h ScanChain.cpp processBaby.cpp JetSubstructureVariables.h
 	$(CC) $(CFLAGS) -I${ROOTSYS}/include -o processBaby processBaby.cpp $(ROOTLIBS) $(FASTJETCFG)
 
+deriveWeights: ScanReweights.cpp deriveWeights.cpp
+	$(CC) $(CFLAGS) -I${ROOTSYS}/include -o deriveWeights deriveWeights.cpp $(ROOTLIBS) $(FASTJETCFG)

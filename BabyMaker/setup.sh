@@ -8,3 +8,4 @@ cd -
 
 ln -s ../CORE/ .
 cp -R ../CORE/ BatchSubmit/
+mkdir weights
