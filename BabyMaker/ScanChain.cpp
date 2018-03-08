@@ -10,6 +10,7 @@
 #include "TBenchmark.h"
 #include "TLorentzVector.h"
 #include "TH2.h"
+#include "TRandom.h"
 
 #include "../CORE/CMS3.cc"
 #include "../CORE/Base.cc"
@@ -119,6 +120,9 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
   int nDuplicates = 0;
   int nEvents = chain->GetEntries();
   int nLeptons = 0;
+  int nSkip = 0;
+  int nBkg = 0;
+  int nSig = 0;
   unsigned int nEventsChain = nEvents;
   cout << "Running on " << nEventsChain << " events" << endl;
   unsigned int nEventsTotal = 0;
@@ -139,7 +143,12 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
     unsigned int nEventsToLoop = tree->GetEntriesFast();
     if (max_events > 0) nEventsToLoop = (unsigned int) max_events;
-    
+   
+    TString weightFile = "weights/weights_PtEta.root";
+    TFile* fWeights = new TFile(weightFile, "READ");
+    TH2D* hProb = (TH2D*)fWeights->Get("hProb");
+    TRandom* rand = new TRandom();
+ 
     //===============================
     // LOOP OVER EVENTS IN FILE
     //===============================
@@ -198,6 +207,21 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         lepton_isFromC = isFromC(abs(pdgid), lepIdx);
         lepton_isFromL = isFromLight(abs(pdgid), lepIdx);
         lepton_isFromLF = isFromLightFake(abs(pdgid), lepIdx);
+
+	// Apply selective sampling to background events
+	if (lepton_isFromW == 0) {
+          nBkg++;
+	  double accept_prob = hProb->GetBinContent(hProb->FindBin(lepton_pt, lepton_eta));
+          if (rand->Uniform() > accept_prob) {
+	    nSkip++;
+	    continue;
+	  }
+        }
+
+        if (lepton_isFromW == 1) {
+  	  if (rand->Uniform() > 0.05) continue;
+          nSig++;
+        }
 
         // Lepton isolation vars
         lepton_relIso03EA = isMu ? muRelIso03EA(lepIdx, 2) : eleRelIso03EA(lepIdx, 2);
@@ -471,11 +495,15 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 
     } // end loop on events in file
     delete tree;
+    fWeights->Close();
     f.Close();
   } // end loop on files
 
   cout << "Processed " << nEventsTotal << " events" << endl;
   cout << "Found " << nLeptons << " leptons" << endl;
+  cout << "Skipped " << nSkip << " out of " << nBkg << " total fake leptons." << endl;
+  cout << "Ratio of signal to background: " << nSig << " / " << nBkg - nSkip << " = " << float(nSig)/float(nBkg - nSkip) << endl;
+
 
   CloseBabyNtuple();
 

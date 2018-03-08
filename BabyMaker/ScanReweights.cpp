@@ -96,10 +96,10 @@ void ScanReweights(TChain* chain, int max_events, TString filename) {
   TFile* f1 = new TFile(filename, "RECREATE");
   f1->cd();
 
-  double ptBins[] = {10, 20, 30, 40, 50, 60, 75, 100, 99999};
+  double ptBins[] = {10, 20, 30, 40, 60, 100, 500};
   int nPtBins = (sizeof(ptBins) / sizeof(ptBins[0])) - 1;
 
-  double etaBins[] = {0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 3.0};
+  double etaBins[] = {0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5};
   int nEtaBins = (sizeof(etaBins) / sizeof(etaBins[0])) - 1;
 
   TH2D* hSig = new TH2D("hSig", "", nPtBins, ptBins, nEtaBins, etaBins);
@@ -181,9 +181,10 @@ void ScanReweights(TChain* chain, int max_events, TString filename) {
   cout << "Real Time:   " << Form( "%.01f s", bmark->GetRealTime("benchmark") ) << endl;
   cout << endl;
 
-  TH2D* hProb = (TH2D*)hSig->Clone();
+  f1->cd();
+  TH2D* hProb = (TH2D*)hSig->Clone("hProb");
   hProb->Divide(hBkg);
-  hProb->Scale(1/hProb->GetMaximum());
+  hProb->Scale(1.0/hProb->GetMaximum());
 
   f1->Write();
   f1->Close();
