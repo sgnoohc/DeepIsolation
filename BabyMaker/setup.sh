@@ -6,6 +6,15 @@ cd /cvmfs/cms.cern.ch/$SCRAM_ARCH/cms/cmssw/$CMSSW_VERSION/src
 eval `scramv1 runtime -sh`
 cd -
 
-ln -s ../CORE/ .
-cp -R ../CORE/ BatchSubmit/
-mkdir weights
+if [ ! -d "CORE" ]; then
+  ln -s ../CORE/ .
+fi
+if [ ! -d "BatchSubmit/CORE" ]; then
+  cp -R ../CORE/ BatchSubmit/
+fi
+
+if [ -d "~/ProjectMetis/" ]; then
+  pushd ~/ProjectMetis/
+  source setup.sh
+  popd
+fi

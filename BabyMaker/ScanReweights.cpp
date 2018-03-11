@@ -109,8 +109,15 @@ void ScanReweights(TChain* chain, int max_events, TString filename) {
     cout << "running on file: " << currentFile->GetTitle() << endl;
     TString currentFileName(currentFile->GetTitle());
 
+
     // Get File Content
     TFile f( currentFile->GetTitle() );
+
+    if (f.IsZombie()) {
+      cout << "File is a zombie, skipping it." << endl;
+      continue;
+    }
+
     TTree *tree = (TTree*)f.Get("Events");
     TTreeCache::SetLearnEntries(10);
     tree->SetCacheSize(128*1024*1024);
