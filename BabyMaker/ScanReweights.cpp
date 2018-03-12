@@ -96,10 +96,10 @@ void ScanReweights(TChain* chain, int max_events, TString filename) {
   TFile* f1 = new TFile(filename, "RECREATE");
   f1->cd();
 
-  double ptBins[] = {10, 20, 30, 40, 60, 100, 500};
+  double ptBins[] = {10, 12.5, 15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 50, 55, 60, 100, 500};
   int nPtBins = (sizeof(ptBins) / sizeof(ptBins[0])) - 1;
 
-  double etaBins[] = {0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5};
+  double etaBins[] = {0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.25, 2.5};
   int nEtaBins = (sizeof(etaBins) / sizeof(etaBins[0])) - 1;
 
   TH2D* hSig = new TH2D("hSig", "", nPtBins, ptBins, nEtaBins, etaBins);
@@ -192,6 +192,22 @@ void ScanReweights(TChain* chain, int max_events, TString filename) {
   TH2D* hProb = (TH2D*)hSig->Clone("hProb");
   hProb->Divide(hBkg);
   hProb->Scale(1.0/hProb->GetMaximum());
+
+  double nSig = hSig->GetEntries();
+  double nBkg = hBkg->GetEntries();
+  double nBkgSS = 0;
+
+  cout << "Total signal leptons: " << nSig << endl;
+  cout << "Total background leptons: " << nBkg << endl;
+
+  for (int i = 0; i < hProb->GetNbinsX(); i++) {
+    for (int j = 0; j < hProb->GetNbinsY(); j++) {
+      nBkgSS += (hBkg->GetBinContent(i+1, j+1))*(hProb->GetBinContent(i+1,j+1)); 
+    }
+  }
+
+  cout << "Total background leptons after selective sampling: " << nBkgSS << endl;
+  cout << "Signal to background ratio after selective sampling: " << nSig/nBkgSS << endl;
 
   f1->Write();
   f1->Close();

@@ -7,7 +7,7 @@ from metis.Sample import DirectorySample
 from metis.CondorTask import CondorTask
 from metis.StatsParser import StatsParser
 
-job_tag = "DeepIso_v0.0.4"
+job_tag = "DeepIso_v0.0.5"
 exec_path = "condor_exe.sh"
 tar_path = "package.tar.gz"
 hadoop_path = "DeepIsolation"
@@ -17,7 +17,8 @@ import corrupt
 os.system("rm processBaby")
 os.system("rm package.tar.gz")
 os.system("cp ../processBaby .") # for some reason this doesn't like to update
-os.system("tar -czf package.tar.gz processBaby CORE")
+os.system("cp ../weights_PtEta.root .")
+os.system("tar -czf package.tar.gz processBaby weights_PtEta.root CORE")
 
 dslocs = [
     [ "/TTbar", "/hadoop/cms/store/group/snt/run2_moriond17/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/" ] , 

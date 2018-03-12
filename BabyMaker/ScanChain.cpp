@@ -45,6 +45,7 @@ using namespace tas;
 const double coneSize = 0.5;
 const int nAnnuli = 8;
 const double coneSizeAnnuli = 1.0;
+const double undersample_prob = 0.085;
 
 double pPRel(const LorentzVector& pCand, const LorentzVector& pLep) {
   if (pLep.pt()<=0.) return 0.;
@@ -144,7 +145,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
     unsigned int nEventsToLoop = tree->GetEntriesFast();
     if (max_events > 0) nEventsToLoop = (unsigned int) max_events;
    
-    TString weightFile = "weights/weights_PtEta.root";
+    TString weightFile = "weights_PtEta.root";
     TFile* fWeights = new TFile(weightFile, "READ");
     TH2D* hProb = (TH2D*)fWeights->Get("hProb");
     TRandom* rand = new TRandom();
@@ -211,15 +212,17 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	// Apply selective sampling to background events
 	if (lepton_isFromW == 0) {
           nBkg++;
-	  double accept_prob = hProb->GetBinContent(hProb->FindBin(lepton_pt, lepton_eta));
+	  double accept_prob = hProb->GetBinContent(hProb->FindBin(lepton_pt, abs(lepton_eta)));
+          cout << accept_prob << endl;
           if (rand->Uniform() > accept_prob) {
 	    nSkip++;
 	    continue;
 	  }
         }
 
+        // Apply undersampling to signal events
         if (lepton_isFromW == 1) {
-  	  if (rand->Uniform() > 0.05) continue;
+  	  if (rand->Uniform() > undersample_prob) continue;
           nSig++;
         }
 
