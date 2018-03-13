@@ -85,19 +85,6 @@ def padArray_cdf(array):
   y = y.transpose((1,2,0)) # data, cands, features
   return y, maxCands
 
-
-def padArray(array, maxCands):
-  nData = len(array[0])
-  nFeatures = len(array)
-  
-  y = numpy.zeros((nData, maxCands, nFeatures))
-  for i in range(nData):
-    for j in range(nFeatures):
-      for k in range(len(array[j][i])):
-        y[i][k][j] = array[j][i][k]
-
-  return y
-
 def preprocess(array):
   if onlyZerosAndOnes(array): # don't preprocess array if it contains only 0's and 1's (e.g. lepton_flavor).
     return array 

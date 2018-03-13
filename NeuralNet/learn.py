@@ -31,12 +31,13 @@ savename = str(sys.argv[1])
 nTrain = int(sys.argv[2])
 
 # Read features from hdf5 file
-f = h5py.File('features_els_11m.hdf5', 'r')
+f = h5py.File('features_Outer.hdf5', 'r')
 
 global_features = f['global']
 charged_pf_features = f['charged_pf']
 photon_pf_features = f['photon_pf']
 neutralHad_pf_features = f['neutralHad_pf']
+#outer_pf_features = f['outer_pf']
 label = f['label']
 relIso = f['relIso']
 
@@ -46,20 +47,24 @@ n_global_features = len(global_features[0])
 n_charged_pf_features = len(charged_pf_features[0][0])
 n_photon_pf_features = len(photon_pf_features[0][0])
 n_neutralHad_pf_features = len(neutralHad_pf_features[0][0])
+#n_outer_pf_features = len(outer_pf_features[0][0])
 
 charged_pf_timestep = len(charged_pf_features[0])
 photon_pf_timestep = len(photon_pf_features[0])
 neutralHad_pf_timestep = len(neutralHad_pf_features[0])
+#outer_pf_timestep = len(outer_pf_features[0])
 
 print(n_global_features)
 print(n_charged_pf_features)
 print(n_photon_pf_features)
 print(n_neutralHad_pf_features)
+#print(n_outer_pf_features)
 print(len(label))
 
 print(charged_pf_timestep)
 print(photon_pf_timestep)
 print(neutralHad_pf_timestep)
+#print(outer_pf_timestep)
 
 ################
 # Structure NN #
@@ -71,10 +76,11 @@ input_photon_pf = keras.layers.Input(shape=(photon_pf_timestep, n_photon_pf_feat
 input_neutralHad_pf = keras.layers.Input(shape=(neutralHad_pf_timestep, n_neutralHad_pf_features), name = 'neutralHad_pf')
 input_global = keras.layers.Input(shape=(n_global_features,), name = 'global')
 
+#model = model.extended_cone(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, outer_pf_timestep, n_outer_pf_features, n_global_features)
 model = model.base(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, n_global_features)
 
 # Train & Test
-nEpochs = 100
+nEpochs = 25*((10**8)//nTrain)
 nBatch = 10000
 
 weights_file = "weights/"+savename+"_weights_{epoch:02d}.hdf5"
@@ -84,14 +90,16 @@ callbacks_list = [checkpoint]
 #validation_data = ([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], label[nTrain:])
 
 
-print(model.summary())
 #model.load_weights(weights_file)
-#model.load_weights("weights/Global_10MTrain_Els_weights_09.hdf5")
+#model.load_weights("weights/Global_Outer_3mTrain_weights_25.hdf5")
+#model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], outer_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
 model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
 #model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch)
+#prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], outer_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
 prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
 
-prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], batch_size = nBatch) 
+#prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], outer_pf_features[:nTrain], global_features[:nTrain]], batch_size = nBatch) 
+prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], batch_size = nBatch)
 
 relIso = numpy.array(relIso)
 relIso = relIso*(-1)

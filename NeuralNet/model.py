@@ -9,7 +9,7 @@ def base(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photo
   input_global = keras.layers.Input(shape=(n_global_features,), name = 'global')
 
   # Convolutional layers for pf cands
-  dropout_rate = 0.1
+  dropout_rate = 0.05
   conv_charged_pf = keras.layers.Convolution1D(32, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_charged_pf_1')(input_charged_pf)
   conv_charged_pf = keras.layers.Dropout(dropout_rate, name = 'cpf_dropout_1')(conv_charged_pf)
   conv_charged_pf = keras.layers.Convolution1D(16, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_charged_pf_2')(conv_charged_pf)
@@ -47,7 +47,7 @@ def base(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photo
   lstm_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_neutralHad_pf_dropout')(lstm_neutralHad_pf)
 
   # MLP to combine LSTM outputs with global features
-  dropout_rate = 0.15
+  dropout_rate = 0.1
   merged_features = keras.layers.concatenate([lstm_charged_pf, lstm_photon_pf, lstm_neutralHad_pf, input_global])
   deep_layer = keras.layers.Dense(200, activation = 'relu', kernel_initializer = 'lecun_uniform', name = 'mlp_1')(merged_features)
   deep_layer = keras.layers.Dropout(dropout_rate, name = 'mlp_dropout_1')(deep_layer)
@@ -102,35 +102,35 @@ def extended_cone(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep
   conv_neutralHad_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_neutralHad_pf_4')(conv_neutralHad_pf)
 
   conv_outer_pf = keras.layers.Convolution1D(24, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_outer_pf_1')(input_outer_pf)
-  conv_outer_pf = keras.layers.Dropout(dropout_rate, name = 'ppf_dropout_1')(conv_outer_pf)
+  conv_outer_pf = keras.layers.Dropout(dropout_rate, name = 'opf_dropout_1')(conv_outer_pf)
   conv_outer_pf = keras.layers.Convolution1D(12, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_outer_pf_2')(conv_outer_pf)
-  conv_outer_pf = keras.layers.Dropout(dropout_rate, name = 'ppf_dropout_2')(conv_outer_pf)
-  conv_outer_pf = keras.layers.Convolution1D(2, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_outer_pf_4')(conv_outer_pf)
+  conv_outer_pf = keras.layers.Dropout(dropout_rate, name = 'opf_dropout_2')(conv_outer_pf)
+  conv_outer_pf = keras.layers.Convolution1D(3, 1, kernel_initializer = 'lecun_uniform', activation = 'relu', name = 'conv_outer_pf_4')(conv_outer_pf)
 
   # LSTMs for pf cands
   batch_momentum = 0.6
   go_backwards = False
 
-  lstm_charged_pf = keras.layers.LSTM(100, implementation = 2, name ='lstm_charged_pf_1', go_backwards = go_backwards)(conv_charged_pf)
+  lstm_charged_pf = keras.layers.LSTM(150, implementation = 2, name ='lstm_charged_pf_1', go_backwards = go_backwards)(conv_charged_pf)
   lstm_charged_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_charged_pf_batchnorm')(lstm_charged_pf)
   lstm_charged_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_charged_pf_dropout')(lstm_charged_pf)
 
-  lstm_photon_pf = keras.layers.LSTM(50, implementation = 2, name = 'lstm_photon_pf_1', go_backwards = go_backwards)(conv_photon_pf)
+  lstm_photon_pf = keras.layers.LSTM(100, implementation = 2, name = 'lstm_photon_pf_1', go_backwards = go_backwards)(conv_photon_pf)
   lstm_photon_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_photon_pf_batchnorm')(lstm_photon_pf)
   lstm_photon_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_photon_pf_dropout')(lstm_photon_pf)
 
-  lstm_neutralHad_pf = keras.layers.LSTM(25, implementation = 2, name = 'lstm_neutralHad_pf_1', go_backwards = go_backwards)(conv_neutralHad_pf)
+  lstm_neutralHad_pf = keras.layers.LSTM(50, implementation = 2, name = 'lstm_neutralHad_pf_1', go_backwards = go_backwards)(conv_neutralHad_pf)
   lstm_neutralHad_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_neutralHad_pf_batchnorm')(lstm_neutralHad_pf)
   lstm_neutralHad_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_neutralHad_pf_dropout')(lstm_neutralHad_pf)
 
-  lstm_outer_pf = keras.layers.LSTM(100, implementation = 2, name = 'lstm_outer_pf_1', go_backwards = go_backwards)(conv_outer_pf)
+  lstm_outer_pf = keras.layers.LSTM(150, implementation = 2, name = 'lstm_outer_pf_1', go_backwards = go_backwards)(conv_outer_pf)
   lstm_outer_pf = keras.layers.normalization.BatchNormalization(momentum = batch_momentum, name = 'lstm_outer_pf_batchnorm')(lstm_outer_pf)
   lstm_outer_pf = keras.layers.Dropout(dropout_rate, name = 'lstm_outer_pf_dropout')(lstm_outer_pf)
 
   # MLP to combine LSTM outputs with global features
-  dropout_rate = 0.15
+  dropout_rate = 0.25
   merged_features = keras.layers.concatenate([lstm_charged_pf, lstm_photon_pf, lstm_neutralHad_pf, lstm_outer_pf, input_global])
-  deep_layer = keras.layers.Dense(300, activation = 'relu', kernel_initializer = 'lecun_uniform', name = 'mlp_1')(merged_features)
+  deep_layer = keras.layers.Dense(400, activation = 'relu', kernel_initializer = 'lecun_uniform', name = 'mlp_1')(merged_features)
   deep_layer = keras.layers.Dropout(dropout_rate, name = 'mlp_dropout_1')(deep_layer)
   deep_layer = keras.layers.Dense(200, activation = 'relu', kernel_initializer = 'lecun_uniform', name = 'mlp_2')(deep_layer)
   deep_layer = keras.layers.Dropout(dropout_rate, name = 'mlp_dropout_2')(deep_layer)
