@@ -22,7 +22,7 @@ void learn(int nTrain)
 
   TMVA::Factory *factory = new TMVA::Factory("TMVA", outputFile, "V:DrawProgressBar=True:Transformations=I;D;P;G:AnalysisType=Classification");
   
-  TString path = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_*.root";
+  TString path = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.5/merged_ntuple_*.root";
   TChain* chain = new TChain("t");
   chain->Add(path);
 
@@ -80,18 +80,19 @@ void learn(int nTrain)
   factory->AddVariable("pf_annuli_energy[7]", 'F');
 
   float nTrainF = nTrain;
-  float nTrainSigF = nTrainF*0.875;
-  float nTrainBkgF = nTrainF*0.125;
+  float nTrainSigF = nTrainF*0.5;
+  float nTrainBkgF = nTrainF*0.5;
 
   int nTrainSig = (int) nTrainSigF;
   int nTrainBkg = (int) nTrainBkgF;
 
-  int nTestSig = 875000;
-  int nTestBkg = 125000;
+  int nTestSig = 100000;
+  int nTestBkg = 100000;
 
   TString prepare_events = "nTrain_Signal=" + to_string(nTrainSig) + ":nTrain_Background=" + to_string(nTrainBkg) + ":nTest_Signal=" + to_string(nTestSig) + ":nTest_Background=" + to_string(nTestBkg) + ":SplitMode=Random:NormMode=NumEvents:!V";   
 
-  factory->PrepareTrainingAndTestTree("lepton_isFromW==1&&lepton_flavor==1", "lepton_isFromW==0&&lepton_flavor==1", prepare_events);
+  //factory->PrepareTrainingAndTestTree("lepton_isFromW==1&&lepton_flavor==1", "lepton_isFromW==0&&lepton_flavor==1", prepare_events); // muons
+  factory->PrepareTrainingAndTestTree("lepton_isFromW==1&&lepton_flavor==1", "lepton_isFromW==0&&lepton_flavor==1", prepare_events); //electrons
   factory->SetSignalWeightExpression("1");
   factory->SetBackgroundWeightExpression("1");
 
