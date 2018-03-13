@@ -71,7 +71,7 @@ n_global_features = len(global_features)
 n_charged_pf_features = len(charged_pf_features)
 n_photon_pf_features = len(photon_pf_features)
 n_neutralHad_pf_features = len(neutralHad_pf_features)
-n_outer_pf_features = len(outer_pf_features)
+#n_outer_pf_features = len(outer_pf_features)
 
 # Reorganize features
 global_features = numpy.transpose(global_features)

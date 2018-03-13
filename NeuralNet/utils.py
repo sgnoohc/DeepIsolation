@@ -112,9 +112,9 @@ def preprocess_pf(array, candLimit):
     for i in range(min(len(element), candLimit)):
       tempArray.append(element[i])
   std = numpy.std(tempArray)
-  array *= 1/std
   mean = numpy.mean(tempArray)
   array += -mean
+  array *= 1/std
   return array
 
 def preprocess_pf_alt(array):
