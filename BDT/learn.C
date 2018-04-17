@@ -22,7 +22,7 @@ void learn(int nTrain)
 
   TMVA::Factory *factory = new TMVA::Factory("TMVA", outputFile, "V:DrawProgressBar=True:Transformations=I;D;P;G:AnalysisType=Classification");
   
-  TString path = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.5/merged_ntuple_*.root";
+  TString path = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.7/merged_ntuple_*.root";
   TChain* chain = new TChain("t");
   chain->Add(path);
 
@@ -61,9 +61,9 @@ void learn(int nTrain)
   factory->AddVariable("lepton_nhiso", 'F');
   factory->AddVariable("lepton_emiso", 'F');
   factory->AddVariable("lepton_ncorriso", 'F');
-  factory->AddVariable("lepton_dxy", 'F');
-  factory->AddVariable("lepton_dz", 'F');
-  factory->AddVariable("lepton_ip3d", 'F');
+  //factory->AddVariable("lepton_dxy", 'F');
+  //factory->AddVariable("lepton_dz", 'F');
+  //factory->AddVariable("lepton_ip3d", 'F');
 
   factory->AddVariable("lepton_nChargedPf", 'I');
   factory->AddVariable("lepton_nPhotonPf", 'I');
