@@ -96,10 +96,11 @@ void ScanReweights(TChain* chain, int max_events, TString filename) {
   TFile* f1 = new TFile(filename, "RECREATE");
   f1->cd();
 
-  double ptBins[] = {10, 12.5, 15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 50, 55, 60, 100, 500};
+  //double ptBins[] = {10, 12.5, 15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 50, 55, 60, 100, 500};
+  double ptBins[] = {10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,62,64,66,68,70,75,80,90,100,150,200,500};
   int nPtBins = (sizeof(ptBins) / sizeof(ptBins[0])) - 1;
 
-  double etaBins[] = {0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.25, 2.5};
+  double etaBins[] = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4};
   int nEtaBins = (sizeof(etaBins) / sizeof(etaBins[0])) - 1;
 
   TH2D* hSig = new TH2D("hSig", "", nPtBins, ptBins, nEtaBins, etaBins);

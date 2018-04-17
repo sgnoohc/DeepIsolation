@@ -4,3 +4,5 @@ v0.0.2 = 16 global features + Phil's FastJet features, 7/5/5 pf cand features (o
 v0.0.3 = 16 global features + Phil's FastJet features, 7/5/5 pf cand features (replace pTRel with pPRel, ordered by pPRel)
 v0.0.4 = v0.0.3 + decrease cone size to 0.4, include list of "outer" pf cands from 0.4-1.0
 v0.0.5 = v0.0.4 + revert to old cone size of 0.5, remove rel-iso cuts on leptons, implement selective sampling in pT and eta for background events, also rejection sampling for signal events to achieve approx 1:1 signal to background ratio
+v0.0.6 = v0.0.5 + inner cone size of 0.3, outer cone size of 0.6
+v0.0.7 = v0.0.5 + finer pT and eta binning

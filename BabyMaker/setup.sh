@@ -13,8 +13,9 @@ if [ ! -d "BatchSubmit/CORE" ]; then
   cp -R ../CORE/ BatchSubmit/
 fi
 
-if [ -d "~/ProjectMetis/" ]; then
+if [ -d ~/ProjectMetis/ ]; then
   pushd ~/ProjectMetis/
+  echo "Setting up Metis"
   source setup.sh
   popd
 fi

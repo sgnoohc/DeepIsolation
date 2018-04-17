@@ -7,13 +7,14 @@ from metis.Sample import DirectorySample
 from metis.CondorTask import CondorTask
 from metis.StatsParser import StatsParser
 
-job_tag = "DeepIso_v0.0.5"
+job_tag = "DeepIso_v0.0.7"
 exec_path = "condor_exe.sh"
 tar_path = "package.tar.gz"
 hadoop_path = "DeepIsolation"
 
 import corrupt
 
+os.system("rm -rf tasks")
 os.system("rm processBaby")
 os.system("rm package.tar.gz")
 os.system("cp ../processBaby .") # for some reason this doesn't like to update

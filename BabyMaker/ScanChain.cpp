@@ -43,9 +43,10 @@ using namespace std;
 using namespace tas;
 
 const double coneSize = 0.5;
+const double coneSizeOuter = 1.0;
 const int nAnnuli = 8;
 const double coneSizeAnnuli = 1.0;
-const double undersample_prob = 0.085;
+const double undersample_prob = 0.08; // this needs to change as pt and eta binning changes
 
 double pPRel(const LorentzVector& pCand, const LorentzVector& pLep) {
   if (pLep.pt()<=0.) return 0.;
@@ -94,6 +95,8 @@ std::vector<unsigned int> goodElecIdx()
     return good_elec_idx;
 }
 
+//_________________________________________________________________________________________________
+//_________________________________________________________________________________________________
 //_________________________________________________________________________________________________
 bool sortByValue(const std::pair<int,float>& pair1, const std::pair<int,float>& pair2 ) {
   return pair1.second > pair2.second;
@@ -200,7 +203,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         lepton_phi = pLep.phi();
         lepton_pt  = pLep.pt() ;
 
-        int pdgid = isMu ? 13 : 11;
+	int pdgid = isMu ? 13 : 11;
 
         // Lepton truth
         lepton_isFromW = isFromW(abs(pdgid), lepIdx);
@@ -213,7 +216,6 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
 	if (lepton_isFromW == 0) {
           nBkg++;
 	  double accept_prob = hProb->GetBinContent(hProb->FindBin(lepton_pt, abs(lepton_eta)));
-          cout << accept_prob << endl;
           if (rand->Uniform() > accept_prob) {
 	    nSkip++;
 	    continue;
@@ -342,7 +344,7 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
             pf_annuli_energy[idx] += pCand.pt();
           }
 
-          if (dR > coneSizeAnnuli) continue;
+          if (dR > coneSizeOuter) continue;
 
           int pf_pdg_id = cms3.pfcands_particleId()[pIdx];
           int pf_charge = cms3.pfcands_charge()[pIdx];
