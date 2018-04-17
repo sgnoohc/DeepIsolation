@@ -52,7 +52,7 @@ for feature in global_features:
   feature = utils.preprocess(feature)
   #feature = utils.preprocess_sigmoid(feature)
 
-nChargedCutoff = 30
+nChargedCutoff = 20
 nPhotonCutoff = 15
 nNeutralHadCutoff = 5
 

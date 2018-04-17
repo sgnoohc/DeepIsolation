@@ -70,7 +70,7 @@ weights_file = "weights/"+savename+"_weights_{epoch:02d}.hdf5"
 checkpoint = keras.callbacks.ModelCheckpoint(weights_file) # save after every epoch 
 callbacks_list = [checkpoint]
 
-model = model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
+model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
 
 relIso = numpy.array(relIso)
 relIso = relIso*(-1)
