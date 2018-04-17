@@ -1,7 +1,6 @@
 ### evaluate_convergence.py
 ### This program trains a DeepIsolation model (delivered by model.py) and examines the convergence by plotting training/testing AUC as a function of number of epcohs
-
-
+import os
 import tensorflow as tf
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -31,7 +30,7 @@ savename = str(sys.argv[1])
 nTrain = int(sys.argv[2])
 
 # Read features from hdf5 file
-f = h5py.File('features.hdf5', 'r')
+f = h5py.File('features_reweight.hdf5', 'r')
 
 global_features = f['global']
 charged_pf_features = f['charged_pf']
@@ -57,21 +56,21 @@ print(n_photon_pf_features)
 print(n_neutralHad_pf_features)
 print(len(label))
 
-model = model.base(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, n_global_features)
+print(charged_pf_timestep)
+print(photon_pf_timestep)
+print(neutralHad_pf_timestep)
+
+model = model.parallel(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, n_global_features)
 
 # Train & Test
-nEpochs = 1
-nBatch = 2500
+nEpochs = 100
+nBatch = 10000
 
 weights_file = "weights/"+savename+"_weights_{epoch:02d}.hdf5"
 checkpoint = keras.callbacks.ModelCheckpoint(weights_file) # save after every epoch 
 callbacks_list = [checkpoint]
 
-#validation_data = ([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], label[nTrain:])
-
-#model.load_weights(weights_file)
-model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
-
+model = model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
 
 relIso = numpy.array(relIso)
 relIso = relIso*(-1)
@@ -87,16 +86,16 @@ for i in range(nEpochs):
   prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], batch_size = nBatch) 
  
 
-  plt.figure()
-  plt.hist(prediction[(label[nTrain:]).astype(bool)], bins = 100, label = 'Signal', color = 'red')
-  plt.hist(prediction[numpy.logical_not(label[nTrain:])], bins = 100, label = 'Background', color = 'blue')
-  plt.legend(loc = 'upper left')
-  plt.xlabel('DeepIsolation Discriminant')
-  plt.ylabel('Events')
-  plt.xlim([0.0,1.0])
-  plt.yscale('log', nonposy='clip')
-  plt.savefig("weights/discriminant_" + str(i+1).zfill(2) + ".pdf") 
-  plt.clf()
+  #plt.figure()
+  #plt.hist(prediction[(label[nTrain:]).astype(bool)], bins = 100, label = 'Signal', color = 'red')
+  #plt.hist(prediction[numpy.logical_not(label[nTrain:])], bins = 100, label = 'Background', color = 'blue')
+  #plt.legend(loc = 'upper left')
+  #plt.xlabel('DeepIsolation Discriminant')
+  #plt.ylabel('Events')
+  #plt.xlim([0.0,1.0])
+  #plt.yscale('log', nonposy='clip')
+  #plt.savefig("weights/discriminant_" + str(i+1).zfill(2) + ".pdf") 
+  #plt.clf()
 
   fpr_nn, tpr_nn, thresh_nn = metrics.roc_curve(label[nTrain:], prediction, pos_label = 1)
   fpr_nn_train, tpr_nn_train, thresh_nn_train = metrics.roc_curve(label[:nTrain], prediction_training_set, pos_label=1)
@@ -109,7 +108,7 @@ plt.plot(x, auc_test, color = 'red', label = 'Testing')
 plt.plot(x, auc_train, color = 'blue', label = 'Training')
 #plt.plot(x, numpy.ones_like(x)*0.977, 'b-', label = 'BDT')
 #plt.plot(x, numpy.ones_like(x)*0.922, 'r-', label = 'RelIso')
-plt.ylim([0.9,1.0])
+plt.ylim([0.95,1.0])
 plt.legend(loc = 'upper left')
 plt.xlabel("Epoch")
 plt.ylabel("AUC")

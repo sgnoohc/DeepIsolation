@@ -2,7 +2,6 @@ import numpy
 import math
 from sklearn.preprocessing import quantile_transform
 
-
 def padArray(array, candLimit):
   lengths = [len(X) for X in array[0]]
   maxCands = min(candLimit, max(lengths))
@@ -18,73 +17,6 @@ def padArray(array, candLimit):
 
   return y
 
-def padArray_v1(array):
-  lengths = [len(X) for X in array[0]]
-  maxCands = max(lengths)
-  nData = len(array[0])
-  nFeatures = len(array)
-
-  y = numpy.zeros((nData, maxCands, nFeatures))
-  for i in range(nData):
-    for j in range(nFeatures):
-      for k in range(len(array[j][i])):
-        y[i][k][j] = array[j][i][k]
-
-  return y, maxCands
-
-def padArray_v2(array, candLimit):
-  lengths = [len(X) for X in array[0]]
-  maxCands = min(candLimit, max(lengths)) 
-  nData = len(array[0])
-  nFeatures = len(array)
-
-  y = numpy.ones((nData, maxCands, nFeatures))
-  y *= -999
-  for i in range(nData):
-    for j in range(nFeatures):
-      for k in range(min(maxCands, len(array[j][i]))):
-        y[i][k][j] = array[j][i][k]
-
-  return y, maxCands
-
-def padArray_v3(array):
-  lengths = [len(X) for X in array[0]]
-  maxCands = max(lengths)
-  nData = len(array[0])
-  nFeatures = len(array)
-
-  y = numpy.ones((nData, maxCands, nFeatures))
-  y *= -999
-  for i in range(nData):
-    for j in range(nFeatures):
-      for k in range(len(array[j][i])):
-        y[i][k][j] = array[j][i][k]
-
-  return y, maxCands
-
-
-
-def padArray_cdf(array):
-  lengths = [len(X) for X in array[0]]
-  maxCands = max(lengths)
-  nData = len(array[0])
-  nFeatures = len(array)
-
-  y = numpy.zeros((nData, maxCands, nFeatures))
-  for i in range(nData):
-    for j in range(nFeatures):
-      for k in range(len(array[j][i])):
-        y[i][k][j] = array[j][i][k] # data, cands, features
-  
-  y = y.transpose((2,0,1)) # features, data, cands
-
-  print(len(y))
-  for i in range(len(y)):
-    print('quantile transforming feature')
-    quantile_transform(y[i])
-  y = y.transpose((1,2,0)) # data, cands, features
-  return y, maxCands
-
 def preprocess(array):
   if onlyZerosAndOnes(array): # don't preprocess array if it contains only 0's and 1's (e.g. lepton_flavor).
     return array 
@@ -93,6 +25,16 @@ def preprocess(array):
   std = numpy.std(array)
   array += -mean
   array *= 1/std
+  return array
+
+def preprocess_sigmoid(array):
+  if onlyZerosAndOnes(array): # don't preprocess array if it contains only 0's and 1's (e.g. lepton_flavor).
+    return array
+  array = array.astype(float)
+  mean = numpy.mean(array)
+  std = numpy.std(array)
+  alpha = (array - mean)*(1/std)
+  array = (1 - numpy.exp(-alpha))/(1 + numpy.exp(-alpha))
   return array
 
 def preprocess_alt(array):
@@ -117,27 +59,29 @@ def preprocess_pf(array, candLimit):
   array *= 1/std
   return array
 
-def preprocess_pf_alt(array):
+def preprocess_pf_sigmoid(array, candLimit):
   tempArray = []
   for element in array:
-    for subElement in element:
-      tempArray.append(subElement)
-  maxVal = max(tempArray)
-  minVal = min(tempArray)
+    for i in range(min(len(element), candLimit)):
+      tempArray.append(element[i])
+  std = numpy.std(tempArray)
+  mean = numpy.mean(tempArray)
+  alpha = (tempArray - mean)*(1/std)
+  tempArray = (1 - numpy.exp(-alpha))/(1 + numpy.exp(-alpha))
 
-  array = array - minVal
-  array *= 1/(maxVal - minVal)
-  return array
-
-def preprocess_cdf(array):
-  if onlyZerosAndOnes(array): # don't preprocess array if it contains only 0's and 1's (e.g. lepton_flavor).
-    return array
-
-  return quantile_transform(array, axis=1)
-    
-def preprocess_pf_cdf(array):
-  for element in array:
-    quantile_transform(element, axis=1)
+  print('Sigmoid transformation: max, min, mean, element 1, element 2, element 3')
+  print(max(tempArray))
+  print(min(tempArray))
+  print(numpy.mean(tempArray))
+  print(tempArray[0])
+  print(tempArray[1])
+  print(tempArray[2])
+  
+  idx = 0
+  for i in range(len(array)):
+    for j in range(min(len(array[i]), candLimit)):
+      array[i][j] = tempArray[idx]
+      idx += 1
   return array
 
 def onlyZerosAndOnes(array):

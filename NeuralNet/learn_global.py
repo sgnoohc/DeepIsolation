@@ -1,4 +1,7 @@
 import os
+#os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+#os.environ["KERAS_BACKEND"] = "tensorflow"
+
 import tensorflow as tf
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -28,13 +31,12 @@ savename = str(sys.argv[1])
 nTrain = int(sys.argv[2])
 
 # Read features from hdf5 file
-f = h5py.File('features_reweight_NoIP.hdf5', 'r')
+f = h5py.File('features_reweight.hdf5', 'r')
 
 global_features = f['global']
 charged_pf_features = f['charged_pf']
 photon_pf_features = f['photon_pf']
 neutralHad_pf_features = f['neutralHad_pf']
-#outer_pf_features = f['outer_pf']
 label = f['label']
 relIso = f['relIso']
 
@@ -63,11 +65,10 @@ print(neutralHad_pf_timestep)
 # Structure NN #
 ################
 
-model = model.parallel(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, n_global_features)
-#model = model.base(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, n_global_features)
+model = model.simple(n_global_features)
 
 # Train & Test
-nEpochs = 10*((2*10**6)//nTrain)
+nEpochs = 50*((2*10**6)//nTrain)
 print('Training for %d epochs' % nEpochs)
 nBatch = 10000
 
@@ -75,17 +76,18 @@ weights_file = "weights/"+savename+"_weights_{epoch:02d}.hdf5"
 checkpoint = keras.callbacks.ModelCheckpoint(weights_file) # save after every epoch 
 callbacks_list = [checkpoint]
 
-#model.load_weights("weights/GlobalNoIP_2mTrain_weights_80.hdf5")
-model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], outer_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
 
-prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
+#model.load_weights("weights/Global_2mTrain_Reweight_weights_72.hdf5")
+model.fit([global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
 
-prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], batch_size = nBatch)
+prediction = model.predict([global_features[nTrain:]], batch_size = nBatch)
+
+prediction_training_set = model.predict([global_features[:nTrain]], batch_size = nBatch)
 
 relIso = numpy.array(relIso)
 relIso = relIso*(-1)
 
-bdt_file = "../BDT/ROCs/BDT_GlobalNoIP.npz" # or change to desired BDT file with fpr and tpr numpy arrays
+bdt_file = "../BDT/ROCs/BDT_GlobalOnly.npz"
 npzfile_bdt = numpy.load(bdt_file)
 fpr_bdt = npzfile_bdt['fpr']
 tpr_bdt = npzfile_bdt['tpr']
@@ -149,3 +151,5 @@ print('RE FPR, TPR: (%.3f, %.3f)' % (fpr_re[idx4RE], tpr_re[idx4RE]))
 print('DeepIso AUC: %.5f' % metrics.auc(fpr_nn, tpr_nn))
 print('DeepIso AUC (training set): %.5f' % metrics.auc(fpr_nn_train, tpr_nn_train))
 print('RelIso AUC: %.5f' % metrics.auc(fpr_re, tpr_re))
+                                                                                                        
+
