@@ -11,11 +11,11 @@ import matplotlib.pyplot as plt
 import utils
 
 # Read data from ROOT file
-files = glob.glob('/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.7/merged_ntuple_*.root')
+files = glob.glob('/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.8/merged_ntuple_*.root') # rounded kinematics
 
 branches = ['lepton_isFromW', 'lepton_pt', 'lepton_eta', 'lepton_phi', 'lepton_relIso03EA', 'lepton_chiso', 'lepton_nhiso', 'lepton_emiso', 'lepton_ncorriso', 'lepton_dxy', 'lepton_dz', 'lepton_ip3d', 'nvtx', 'lepton_flavor', 'lepton_nChargedPf', 'lepton_nPhotonPf', 'lepton_nNeutralHadPf', 'lepton_nOuterPf', 'pf_charged_pt', 'pf_charged_dR', 'pf_charged_alpha', 'pf_charged_pPRel', 'pf_charged_puppiWeight', 'pf_charged_fromPV', 'pf_charged_pvAssociationQuality', 'pf_photon_pt', 'pf_photon_dR', 'pf_photon_alpha', 'pf_photon_pPRel', 'pf_photon_puppiWeight', 'pf_neutralHad_pt', 'pf_neutralHad_dR', 'pf_neutralHad_alpha', 'pf_neutralHad_pPRel', 'pf_neutralHad_puppiWeight', 'pf_outer_pt', 'pf_outer_dR', 'pf_outer_alpha', 'pf_outer_pPRel', 'pf_outer_type', 'substr_ptrel', 'substr_sumdij', 'substr_nreclsj', ('substr_reclsj_dr', 0), ('substr_reclsj_pt', 0), 'pf_annuli_energy[0]', 'pf_annuli_energy[1]', 'pf_annuli_energy[2]', 'pf_annuli_energy[3]','pf_annuli_energy[4]','pf_annuli_energy[5]','pf_annuli_energy[6]','pf_annuli_energy[7]']
 
-nFiles = 47 # change this as needed. Roughly 300k muons per file
+nFiles = 100 # change this as needed
 data = numpy.empty(shape=0)
 
 idx = 0
@@ -36,13 +36,14 @@ for file in files:
   idx += 1
 
 # Grab features
-global_features = numpy.array([data['lepton_pt'], data['lepton_eta'], data['lepton_phi'], data['lepton_relIso03EA'], data['lepton_chiso'], data['lepton_nhiso'], data['lepton_emiso'], data['lepton_ncorriso'], data['lepton_dxy'], data['lepton_dz'], data['lepton_ip3d'], data['nvtx'], data['lepton_flavor'], data['lepton_nChargedPf'], data['lepton_nPhotonPf'], data['lepton_nNeutralHadPf']])
-#global_features = numpy.array([data['lepton_pt'], data['lepton_eta'], data['lepton_phi'], data['lepton_relIso03EA'], data['lepton_chiso'], data['lepton_nhiso'], data['lepton_emiso'], data['lepton_ncorriso'], data['nvtx'], data['lepton_flavor'], data['lepton_nChargedPf'], data['lepton_nPhotonPf'], data['lepton_nNeutralHadPf']]) # no IP
+#global_features = numpy.array([data['lepton_pt'], data['lepton_eta'], data['lepton_phi'], data['lepton_relIso03EA'], data['lepton_chiso'], data['lepton_nhiso'], data['lepton_emiso'], data['lepton_ncorriso'], data['lepton_dxy'], data['lepton_dz'], data['lepton_ip3d'], data['nvtx'], data['lepton_flavor'], data['lepton_nChargedPf'], data['lepton_nPhotonPf'], data['lepton_nNeutralHadPf']])
+global_features = numpy.array([data['lepton_pt'], data['lepton_eta'], data['lepton_phi'], data['lepton_relIso03EA'], data['lepton_chiso'], data['lepton_nhiso'], data['lepton_emiso'], data['lepton_ncorriso'], data['nvtx'], data['lepton_flavor'], data['lepton_nChargedPf'], data['lepton_nPhotonPf'], data['lepton_nNeutralHadPf']]) # no IP
+
 
 charged_pf_features = numpy.array([data['pf_charged_pt'], data['pf_charged_dR'], data['pf_charged_alpha'], data['pf_charged_pPRel'], data['pf_charged_puppiWeight'], data['pf_charged_fromPV'], data['pf_charged_pvAssociationQuality']])
 photon_pf_features = numpy.array([data['pf_photon_pt'], data['pf_photon_dR'], data['pf_photon_alpha'], data['pf_photon_pPRel'], data['pf_photon_puppiWeight']])
 neutralHad_pf_features = numpy.array([data['pf_neutralHad_pt'], data['pf_neutralHad_dR'], data['pf_neutralHad_alpha'], data['pf_neutralHad_pPRel'], data['pf_neutralHad_puppiWeight']])
-outer_pf_features = numpy.array([data['pf_outer_pt'], data['pf_outer_dR'], data['pf_outer_alpha'], data['pf_outer_pPRel'], data['pf_outer_type']])
+#outer_pf_features = numpy.array([data['pf_outer_pt'], data['pf_outer_dR'], data['pf_outer_alpha'], data['pf_outer_pPRel'], data['pf_outer_type']])
 
 label = data['lepton_isFromW']
 relIso = data['lepton_relIso03EA']
@@ -79,7 +80,7 @@ charged_pf_features = utils.padArray(charged_pf_features, nChargedCutoff)
 photon_pf_features = utils.padArray(photon_pf_features, nPhotonCutoff)
 neutralHad_pf_features = utils.padArray(neutralHad_pf_features, nNeutralHadCutoff)
 
-f = h5py.File("features_reweight_NoIP.hdf5", "w") # change name as needed
+f = h5py.File("features_reweight_RoundedKinematics_NoIP.hdf5", "w") # change name as needed
 
 dset_global = f.create_dataset("global", data=global_features)
 dset_charged_pf = f.create_dataset("charged_pf", data=charged_pf_features)

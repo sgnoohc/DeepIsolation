@@ -28,7 +28,7 @@ savename = str(sys.argv[1])
 nTrain = int(sys.argv[2])
 
 # Read features from hdf5 file
-f = h5py.File('features_reweight_NoIP.hdf5', 'r')
+f = h5py.File("features_reweight_RoundedKinematics_NoIP.hdf5", "r")
 
 global_features = f['global']
 charged_pf_features = f['charged_pf']
@@ -67,7 +67,7 @@ model = model.parallel(charged_pf_timestep, n_charged_pf_features, photon_pf_tim
 #model = model.base(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, n_global_features)
 
 # Train & Test
-nEpochs = 10*((2*10**6)//nTrain)
+nEpochs = 100*((2*10**6)//nTrain)
 print('Training for %d epochs' % nEpochs)
 nBatch = 10000
 
@@ -76,7 +76,7 @@ checkpoint = keras.callbacks.ModelCheckpoint(weights_file) # save after every ep
 callbacks_list = [checkpoint]
 
 #model.load_weights("weights/GlobalNoIP_2mTrain_weights_80.hdf5")
-model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], outer_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
+model.fit([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], label[:nTrain], epochs = nEpochs, batch_size = nBatch, callbacks=callbacks_list)
 
 prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
 
@@ -149,3 +149,46 @@ print('RE FPR, TPR: (%.3f, %.3f)' % (fpr_re[idx4RE], tpr_re[idx4RE]))
 print('DeepIso AUC: %.5f' % metrics.auc(fpr_nn, tpr_nn))
 print('DeepIso AUC (training set): %.5f' % metrics.auc(fpr_nn_train, tpr_nn_train))
 print('RelIso AUC: %.5f' % metrics.auc(fpr_re, tpr_re))
+
+print('Now making convergence plot')
+auc_test = numpy.zeros(nEpochs)
+auc_train = numpy.zeros(nEpochs)
+x = numpy.linspace(1, nEpochs, nEpochs)
+
+for i in range(nEpochs):
+  print(i)
+  model.load_weights("weights/"+savename+"_weights_" + str(i+1).zfill(2) + ".hdf5")
+
+  prediction = model.predict([charged_pf_features[nTrain:], photon_pf_features[nTrain:], neutralHad_pf_features[nTrain:], global_features[nTrain:]], batch_size = nBatch)
+  prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf_features[:nTrain], neutralHad_pf_features[:nTrain], global_features[:nTrain]], batch_size = nBatch)
+  #plt.figure()
+  #plt.hist(prediction[(label[nTrain:]).astype(bool)], bins = 100, label = 'Signal', color = 'red')
+  #plt.hist(prediction[numpy.logical_not(label[nTrain:])], bins = 100, label = 'Background', color = 'blue')
+  #plt.legend(loc = 'upper left')
+  #plt.xlabel('DeepIsolation Discriminant')
+  #plt.ylabel('Events')
+  #plt.xlim([0.0,1.0])
+  #plt.yscale('log', nonposy='clip')
+  #plt.savefig("weights/discriminant_" + str(i+1).zfill(2) + ".pdf") 
+  #plt.clf()
+
+  fpr_nn, tpr_nn, thresh_nn = metrics.roc_curve(label[nTrain:], prediction, pos_label = 1)
+  fpr_nn_train, tpr_nn_train, thresh_nn_train = metrics.roc_curve(label[:nTrain], prediction_training_set, pos_label=1)
+
+  auc_test[i] = metrics.auc(fpr_nn, tpr_nn)
+  auc_train[i] = metrics.auc(fpr_nn_train, tpr_nn_train)
+
+plt.figure()
+plt.plot(x, auc_test, color = 'red', label = 'Testing')
+plt.plot(x, auc_train, color = 'blue', label = 'Training')
+#plt.plot(x, numpy.ones_like(x)*0.977, 'b-', label = 'BDT')
+#plt.plot(x, numpy.ones_like(x)*0.922, 'r-', label = 'RelIso')
+plt.ylim([0.95,1.0])
+plt.legend(loc = 'upper left')
+plt.xlabel("Epoch")
+plt.ylabel("AUC")
+plt.savefig("convergence.pdf")
+
+print('Best testing AUC: %.5f' % max(auc_test))
+print('Corresponding training AUC: %.5f' % auc_train[auc_test.argmax()])
+print('This was epoch %s' % str(auc_test.argmax()+1))
