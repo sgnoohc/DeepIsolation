@@ -48,6 +48,25 @@ const int nAnnuli = 8;
 const double coneSizeAnnuli = 1.0;
 const double undersample_prob = 0.08; // this needs to change as pt and eta binning changes
 
+const bool round_kinematics = true;
+const vector<double> pt_bins = {10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,62,64,66,68,70,75,80,90,100,150,200,500};
+const vector<double> eta_bins = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4};
+
+double round_to_bin(double initial_value, const vector<double> bins) {
+  double value = abs(initial_value);
+  int sgn = initial_value > 0 ? 1 : -1;
+  if (value < bins[0])
+    return sgn*bins[0];
+  if (value > bins[bins.size() - 1])
+    return sgn*bins[bins.size() - 1];
+  for (int i = 0; i < bins.size()-1; i++) {
+    if (value > bins[i] && value < bins[i+1]) {
+      return abs(value - bins[i]) < abs(value - bins[i+1]) ? sgn*bins[i] : sgn*bins[i+1];
+    }
+  }
+  return -999;
+}
+
 double pPRel(const LorentzVector& pCand, const LorentzVector& pLep) {
   if (pLep.pt()<=0.) return 0.;
   LorentzVector jp4 = pLep;
@@ -202,6 +221,11 @@ void BabyMaker::ScanChain(TChain* chain, std::string baby_name, int max_events){
         lepton_eta = pLep.eta();
         lepton_phi = pLep.phi();
         lepton_pt  = pLep.pt() ;
+
+	if (round_kinematics) {
+          lepton_eta = round_to_bin(lepton_eta, eta_bins);
+          lepton_pt = round_to_bin(lepton_pt, pt_bins);
+        }
 
 	int pdgid = isMu ? 13 : 11;
 
