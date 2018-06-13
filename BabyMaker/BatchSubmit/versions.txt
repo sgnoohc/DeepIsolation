@@ -6,3 +6,4 @@ v0.0.4 = v0.0.3 + decrease cone size to 0.4, include list of "outer" pf cands fr
 v0.0.5 = v0.0.4 + revert to old cone size of 0.5, remove rel-iso cuts on leptons, implement selective sampling in pT and eta for background events, also rejection sampling for signal events to achieve approx 1:1 signal to background ratio
 v0.0.6 = v0.0.5 + inner cone size of 0.3, outer cone size of 0.6
 v0.0.7 = v0.0.5 + finer pT and eta binning
+v0.0.8 = v0.0.7 + round pT and eta to nearest bin

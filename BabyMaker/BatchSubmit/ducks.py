@@ -7,14 +7,14 @@ from metis.Sample import DirectorySample
 from metis.CondorTask import CondorTask
 from metis.StatsParser import StatsParser
 
-job_tag = "DeepIso_v0.0.7"
+job_tag = "DeepIso_v0.0.8_test2"
 exec_path = "condor_exe.sh"
 tar_path = "package.tar.gz"
 hadoop_path = "DeepIsolation"
 
 import corrupt
 
-os.system("rm -rf tasks")
+#os.system("rm -rf tasks")
 os.system("rm processBaby")
 os.system("rm package.tar.gz")
 os.system("cp ../processBaby .") # for some reason this doesn't like to update
@@ -48,7 +48,7 @@ while True:
                 sample = sample,
                 open_dataset = False,
                 flush = True,
-                files_per_output = 10,
+                files_per_output = 1,
                 output_name = "merged_ntuple.root",
                 tag = job_tag,
                 cmssw_version = "CMSSW_9_2_1", # doesn't do anything
@@ -58,7 +58,8 @@ while True:
                 special_dir = hadoop_path
                 )
         task.process()
-        allcomplete = allcomplete and task.complete()
+        if not task.complete():
+          allcomplete = False
         # save some information for the dashboard
         total_summary[ds] = task.get_task_summary()
     # parse the total summary and write out the dashboard

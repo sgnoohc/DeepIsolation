@@ -9,6 +9,14 @@ echo "OUTPUTFILENAME : $OUTPUTFILENAME"
 echo "INPUTFILENAMES : $INPUTFILENAMES"
 echo "INDEX : $INDEX"
 
+echo "[wrapper] printing env"
+printenv
+echo 
+
+echo "[wrapper] hostname  = " `hostname`
+echo "[wrapper] date      = " `date`
+echo "[wrapper] linux timestamp = " `date +%s`
+
 export SCRAM_ARCH=slc6_amd64_gcc530
 
 source /cvmfs/cms.cern.ch/cmsset_default.sh
