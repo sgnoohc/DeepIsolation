@@ -22,7 +22,8 @@ void learn(int nTrain)
 
   TMVA::Factory *factory = new TMVA::Factory("TMVA", outputFile, "V:DrawProgressBar=True:Transformations=I;D;P;G:AnalysisType=Classification");
   
-  TString path = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.7/merged_ntuple_*.root";
+  //TString path = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.7/merged_ntuple_*.root";
+  TString path = "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.8/merged_ntuple_*.root"; // rounded kinematics
   TChain* chain = new TChain("t");
   chain->Add(path);
 
@@ -35,7 +36,6 @@ void learn(int nTrain)
   while ( (currentFile = (TFile*)fileIter.Next()) ) 
     vFiles.push_back(currentFile->GetTitle());
 
-  //vector<TString> vFiles = {"/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_1.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_2.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_3.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_4.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_5.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_6.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_7.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_8.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_9.root", "/hadoop/cms/store/user/smay/DeepIsolation/TTbar_DeepIso_v0.0.1_ptRelOrdered/merged_ntuple_10.root", };
   vector<TFile*> vFileSig;
   vector<TFile*> vFileBkg;
   vector<TTree*> vTreeSig;
@@ -91,8 +91,8 @@ void learn(int nTrain)
 
   TString prepare_events = "nTrain_Signal=" + to_string(nTrainSig) + ":nTrain_Background=" + to_string(nTrainBkg) + ":nTest_Signal=" + to_string(nTestSig) + ":nTest_Background=" + to_string(nTestBkg) + ":SplitMode=Random:NormMode=NumEvents:!V";   
 
-  //factory->PrepareTrainingAndTestTree("lepton_isFromW==1&&lepton_flavor==1", "lepton_isFromW==0&&lepton_flavor==1", prepare_events); // muons
-  factory->PrepareTrainingAndTestTree("lepton_isFromW==1&&lepton_flavor==1", "lepton_isFromW==0&&lepton_flavor==1", prepare_events); //electrons
+  //factory->PrepareTrainingAndTestTree("lepton_isFromW==1&&lepton_flavor==0", "lepton_isFromW==0&&lepton_flavor==0", prepare_events); // electrons
+  factory->PrepareTrainingAndTestTree("lepton_isFromW==1&&lepton_flavor==1", "lepton_isFromW==0&&lepton_flavor==1", prepare_events); //muons
   factory->SetSignalWeightExpression("1");
   factory->SetBackgroundWeightExpression("1");
 
