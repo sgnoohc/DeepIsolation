@@ -5,3 +5,7 @@ echo Setting up CMSSW for CMSSW_8_0_3 for slc6_amd64_gcc530
 cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_3/src
 eval `scramv1 runtime -sh`
 cd -
+
+if [ ! -d ROCs ]; then
+  mkdir ROCs
+fi
