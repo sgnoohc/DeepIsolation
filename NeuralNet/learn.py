@@ -67,7 +67,7 @@ model = model.parallel(charged_pf_timestep, n_charged_pf_features, photon_pf_tim
 #model = model.base(charged_pf_timestep, n_charged_pf_features, photon_pf_timestep, n_photon_pf_features, neutralHad_pf_timestep, n_neutralHad_pf_features, n_global_features)
 
 # Train & Test
-nEpochs = 100*((2*10**6)//nTrain)
+nEpochs = 100 
 print('Training for %d epochs' % nEpochs)
 nBatch = 10000
 
@@ -85,10 +85,10 @@ prediction_training_set = model.predict([charged_pf_features[:nTrain], photon_pf
 relIso = numpy.array(relIso)
 relIso = relIso*(-1)
 
-bdt_file = "../BDT/ROCs/BDT_GlobalNoIP.npz" # or change to desired BDT file with fpr and tpr numpy arrays
-npzfile_bdt = numpy.load(bdt_file)
-fpr_bdt = npzfile_bdt['fpr']
-tpr_bdt = npzfile_bdt['tpr']
+#bdt_file = "../BDT/ROCs/BDT_GlobalNoIP.npz" # or change to desired BDT file with fpr and tpr numpy arrays
+#npzfile_bdt = numpy.load(bdt_file)
+#fpr_bdt = npzfile_bdt['fpr']
+#tpr_bdt = npzfile_bdt['tpr']
 
 fpr_re, tpr_re, thresh_re = metrics.roc_curve(label[nTrain:], relIso[nTrain:], pos_label = 1)
 fpr_nn, tpr_nn, thresh_nn = metrics.roc_curve(label[nTrain:], prediction, pos_label = 1)
@@ -103,7 +103,7 @@ ax = fig.add_subplot(111)
 ax.yaxis.set_ticks_position('both')
 ax.grid(True)
 plt.plot(fpr_re, tpr_re, color='darkred', lw=2, label='RelIso')
-plt.plot(fpr_bdt, tpr_bdt, color='blue', lw=2, label='BDT')
+#plt.plot(fpr_bdt, tpr_bdt, color='blue', lw=2, label='BDT')
 plt.plot(fpr_nn, tpr_nn, color = 'darkorange', lw=2, label='DNN')
 plt.xscale('log')
 plt.grid()
@@ -120,10 +120,10 @@ value2, idx2 = utils.find_nearest(tpr_nn, 0.99)
 value3, idx3 = utils.find_nearest(fpr_nn, 0.01)
 value4, idx4 = utils.find_nearest(fpr_nn, 0.1)
 
-value1BDT, idx1BDT = utils.find_nearest(tpr_bdt, 0.90)
-value2BDT, idx2BDT = utils.find_nearest(tpr_bdt, 0.99)
-value3BDT, idx3BDT = utils.find_nearest(fpr_bdt, 0.01)
-value4BDT, idx4BDT = utils.find_nearest(fpr_bdt, 0.1)
+#value1BDT, idx1BDT = utils.find_nearest(tpr_bdt, 0.90)
+#value2BDT, idx2BDT = utils.find_nearest(tpr_bdt, 0.99)
+#value3BDT, idx3BDT = utils.find_nearest(fpr_bdt, 0.01)
+#value4BDT, idx4BDT = utils.find_nearest(fpr_bdt, 0.1)
 
 value1RE, idx1RE = utils.find_nearest(tpr_re, 0.90)
 value2RE, idx2RE = utils.find_nearest(tpr_re, 0.99)
@@ -136,10 +136,10 @@ print('Neural net FPR, TPR: (%.3f, %.3f)' % (fpr_nn[idx2], tpr_nn[idx2]))
 print('Neural net FPR, TPR: (%.3f, %.3f)' % (fpr_nn[idx3], tpr_nn[idx3]))
 print('Neural net FPR, TPR: (%.3f, %.3f)' % (fpr_nn[idx4], tpr_nn[idx4]))
 
-print('BDT FPR, TPR: (%.3f, %.3f)' % (fpr_bdt[idx1BDT], tpr_bdt[idx1BDT]))
-print('BDT FPR, TPR: (%.3f, %.3f)' % (fpr_bdt[idx2BDT], tpr_bdt[idx2BDT]))
-print('BDT FPR, TPR: (%.3f, %.3f)' % (fpr_bdt[idx3BDT], tpr_bdt[idx3BDT]))
-print('BDT FPR, TPR: (%.3f, %.3f)' % (fpr_bdt[idx4BDT], tpr_bdt[idx4BDT]))
+#print('BDT FPR, TPR: (%.3f, %.3f)' % (fpr_bdt[idx1BDT], tpr_bdt[idx1BDT]))
+#print('BDT FPR, TPR: (%.3f, %.3f)' % (fpr_bdt[idx2BDT], tpr_bdt[idx2BDT]))
+#print('BDT FPR, TPR: (%.3f, %.3f)' % (fpr_bdt[idx3BDT], tpr_bdt[idx3BDT]))
+#print('BDT FPR, TPR: (%.3f, %.3f)' % (fpr_bdt[idx4BDT], tpr_bdt[idx4BDT]))
 
 print('RE FPR, TPR: (%.3f, %.3f)' % (fpr_re[idx1RE], tpr_re[idx1RE]))
 print('RE FPR, TPR: (%.3f, %.3f)' % (fpr_re[idx2RE], tpr_re[idx2RE]))
