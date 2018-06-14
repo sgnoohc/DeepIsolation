@@ -19,10 +19,3 @@ if [ -d ~/ProjectMetis/ ]; then
   source setup.sh
   popd
 fi
-
-# Make CMS3 class files
-# Note: if you want to use different CMS3/4 ntuples, you'll need to manually change the path to the ntuple 
-git clone https://github.com/cmstas/software.git
-cd software/makeCMS3ClassFiles/
-root -l -b -q 'makeCMS3ClassFiles.C+("/hadoop/cms/store/group/snt/run2_moriond17/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/merged_ntuple_1.root", "Events")'
-cp CMS3* ../../
