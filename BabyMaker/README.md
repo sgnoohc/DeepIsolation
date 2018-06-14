@@ -6,7 +6,10 @@ Makes baby ntuples from CMS3 to feed into NN.
 2. Create looper file for deriving pT and eta reweighting: `python deriveReweights.py`
 3. `make`
 4. Create file containing pT/eta acceptance probabilities for reweighting: `./deriveReweights`
-5. Run a test case baby: `./processBaby /hadoop/cms/store/group/snt/run2_moriond17/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/merged_ntuple_1.root dummyJob 123 [nevents=-1]`
+	i. This may take a couple hours. Run in `screen` and enjoy favorite leisure activities in the meantime.
+	ii. If you want to change the pT/eta binning, you can do so inside `ScanReweights.cpp`
+	iii. `deriveReweights` will print out an undersample probability that will give you a signal-to-background ratio of 1. In `ScanChain.cpp` change the value of `undersample_prob` (line 49) accordingly. 
+5. Run a test case baby: `./processBaby /hadoop/cms/store/group/snt/run2_moriond17/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/merged_ntuple_1.root dummyJob 123 -1`
 6. When satisfied with your test case, submit full set of jobs to condor. `cd BatchSubmit ; python ducks.py`
 
 ### Metis
