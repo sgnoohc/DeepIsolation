@@ -11,7 +11,7 @@
 #include "TLorentzVector.h"
 #include "TH2.h"
 
-#include "../CORE/CMS3.cc"
+#include "CMS3.cc"
 #include "../CORE/Base.cc"
 #include "../CORE/OSSelections.cc"
 //#include "../CORE/SSSelections.cc"
