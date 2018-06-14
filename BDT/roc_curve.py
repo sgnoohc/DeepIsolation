@@ -7,7 +7,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-files = ["BDT_GlobalOnly.root", "BDT_CandsOnly.root", "BDT_AllFeatures.root", "BDT_GlobalNoIP.root", "BDT_GlobalNoKin.root", "BDT_Global_NoIPRoundedKinematics.root", "BDT_AllFeatures_RoundedKinematics.root"]
+files = ["BDT.root"]
+#files = ["BDT_GlobalOnly.root", "BDT_CandsOnly.root", "BDT_AllFeatures.root", "BDT_GlobalNoIP.root", "BDT_GlobalNoKin.root", "BDT_Global_NoIPRoundedKinematics.root", "BDT_AllFeatures_RoundedKinematics.root"]
 
 branches = ['classID', 'BDT']
 
