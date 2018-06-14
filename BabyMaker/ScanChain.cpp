@@ -12,7 +12,7 @@
 #include "TH2.h"
 #include "TRandom.h"
 
-#include "CMS3.cc"
+#include "../CORE/CMS3.cc"
 #include "../CORE/Base.cc"
 #include "../CORE/OSSelections.cc"
 //#include "../CORE/SSSelections.cc"
