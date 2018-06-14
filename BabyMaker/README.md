@@ -2,7 +2,7 @@
 Makes baby ntuples from CMS3 to feed into NN.
 
 ### Running
-1. `source setup.sh`
+1. `cd BabyMaker ; source setup.sh`
 2. Create looper file for deriving pT and eta reweighting: `python deriveReweights.py`
 3. `make`
 4. Create file containing pT/eta acceptance probabilities for reweighting: `./deriveReweights`
